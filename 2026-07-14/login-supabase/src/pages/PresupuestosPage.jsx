@@ -1,4 +1,4 @@
 function PresupuestosPage() {
-  return <h1>Presupuestos</h1>
+  return <h1>en construccion</h1>
 }
 export default PresupuestosPage

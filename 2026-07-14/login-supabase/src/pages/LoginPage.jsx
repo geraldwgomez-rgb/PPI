@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
-export default function LoginPage({ onLogin }) {
+export default function LoginPage({ onLogin, onVolver }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
@@ -27,12 +27,24 @@ export default function LoginPage({ onLogin }) {
         <div className="col-12 col-md-6 col-lg-4">
           <div className="card bg-dark border-info border-opacity-50 shadow-lg p-4" style={{ borderRadius: '20px' }}>
             <div className="card-body">
+
+              {/* Botón volver */}
+              <button
+                type="button"
+                className="btn btn-link text-secondary p-0 mb-3 d-flex align-items-center gap-1"
+                onClick={onVolver}
+              >
+                ← Volver al inicio
+              </button>
+
               <h2 className="text-info fw-bold text-center mb-4">
                 {isSignUp ? 'Crear cuenta' : 'Iniciar Sesión'}
               </h2>
+
               {errorMsg && (
                 <div className="alert alert-danger py-2 text-center small">{errorMsg}</div>
               )}
+
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
                   <label className="form-label text-white fw-light">Correo</label>
@@ -66,6 +78,7 @@ export default function LoginPage({ onLogin }) {
                   </button>
                 </div>
               </form>
+
             </div>
           </div>
         </div>

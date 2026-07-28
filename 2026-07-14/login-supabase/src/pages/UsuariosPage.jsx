@@ -1,4 +1,4 @@
 function UsuariosPage() {
-  return <h1>Usuarios</h1>
+  return <h1>en construccion</h1>
 }
 export default UsuariosPage
