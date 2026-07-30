@@ -1,31 +1,39 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 
-export default function ListaGastos({ session }) {
+export default function ListaGastos({ session, recargar, filtros = {} }) {
   const [gastos, setGastos] = useState([])
   const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
     obtenerGastos()
-  }, [])
+  }, [recargar, filtros])
 
   async function obtenerGastos() {
     setCargando(true)
-    const { data, error } = await supabase
+
+    let query = supabase
       .from('gastos')
-      .select(`
-        id_gasto,
-        descripcion,
-        tipo,
-        monto,
-        fecha,
-        categoria ( nombre )
-      `)
+      .select('id_gasto, descripcion, tipo, monto, fecha, categoria ( nombre )')
       .eq('cedula_usuario', session.user.email)
       .order('fecha', { ascending: false })
 
+    if (filtros.categoria) query = query.eq('id_categoria', filtros.categoria)
+    if (filtros.fechaInicio) query = query.gte('fecha', filtros.fechaInicio)
+    if (filtros.fechaFin) query = query.lte('fecha', filtros.fechaFin)
+    if (filtros.montoMax) query = query.lte('monto', filtros.montoMax)
+
+    const { data, error } = await query
     if (error) console.error(error)
-    else setGastos(data)
+    else {
+      let resultado = data
+      if (filtros.busqueda) {
+        resultado = data.filter(g =>
+          g.descripcion.toLowerCase().includes(filtros.busqueda.toLowerCase())
+        )
+      }
+      setGastos(resultado)
+    }
     setCargando(false)
   }
 
@@ -33,9 +41,9 @@ export default function ListaGastos({ session }) {
 
   return (
     <div>
-      <h4 className="text-info mb-3">Lista de Gastos</h4>
+      <h4 className="text-info mb-3">Lista de Gastos ({gastos.length})</h4>
       {gastos.length === 0 ? (
-        <p className="text-secondary">No tienes gastos registrados aún.</p>
+        <p className="text-secondary">No se encontraron gastos.</p>
       ) : (
         <table className="table table-dark table-bordered table-hover">
           <thead>

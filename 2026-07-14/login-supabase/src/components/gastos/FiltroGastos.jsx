@@ -1,140 +1,117 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react'
+import { supabase } from '../../lib/supabaseClient'
 
 export default function FiltroGastos({ onFiltrar }) {
-  // Estado para almacenar todos los criterios de búsqueda
   const [filtros, setFiltros] = useState({
     busqueda: '',
     categoria: '',
     fechaInicio: '',
     fechaFin: '',
-    montoMin: '',
     montoMax: ''
-  });
+  })
+  const [categorias, setCategorias] = useState([])
 
-  // Manejador genérico de cambios en los inputs
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    const nuevosFiltros = {
-      ...filtros,
-      [name]: value
-    };
-    
-    setFiltros(nuevosFiltros);
-    
-    // Notifica al componente padre los filtros actualizados
-    if (onFiltrar) {
-      onFiltrar(nuevosFiltros);
+  useEffect(() => {
+    async function cargarCategorias() {
+      const { data } = await supabase
+        .from('categoria')
+        .select('id_categoria, nombre')
+        .in('tipo_movimiento', ['GASTO', 'AMBOS'])
+      if (data) setCategorias(data)
     }
-  };
+    cargarCategorias()
+  }, [])
 
-  // Limpia todos los campos del filtro
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    const nuevosFiltros = { ...filtros, [name]: value }
+    setFiltros(nuevosFiltros)
+    if (onFiltrar) onFiltrar(nuevosFiltros)
+  }
+
   const handleReset = () => {
     const filtrosLimpios = {
       busqueda: '',
       categoria: '',
       fechaInicio: '',
       fechaFin: '',
-      montoMin: '',
       montoMax: ''
-    };
-    setFiltros(filtrosLimpios);
-    if (onFiltrar) {
-      onFiltrar(filtrosLimpios);
     }
-  };
+    setFiltros(filtrosLimpios)
+    if (onFiltrar) onFiltrar(filtrosLimpios)
+  }
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6">
-      <div className="flex items-center justify-between mb-3 border-b border-gray-100 pb-2">
-        <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-          <span>🔍</span> Filtrar y Buscar Gastos
-        </h3>
-        <button
-          type="button"
-          onClick={handleReset}
-          className="text-xs text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors"
-        >
+    <div className="card bg-dark border-secondary p-4 mb-4" style={{ borderRadius: '16px' }}>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h5 className="text-white m-0">🔍 Filtrar Gastos</h5>
+        <button type="button" className="btn btn-link text-info small p-0" onClick={handleReset}>
           Limpiar filtros
         </button>
       </div>
 
-      {/* Grid de Controles del Filtro */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
-        
-        {/* 1. Búsqueda por concepto / proveedor */}
-        <div className="lg:col-span-2">
-          <label className="block text-xs font-semibold text-gray-600 mb-1">
-            Buscar Concepto / Proveedor
-          </label>
+      <div className="row g-3">
+
+        {/* Búsqueda */}
+        <div className="col-12 col-md-6 col-lg-3">
+          <label className="form-label text-white fw-light small">Buscar concepto</label>
           <input
             type="text"
             name="busqueda"
-            className="w-full text-xs p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder="Ej: Factura luz, Papelería..."
+            className="form-control bg-black border-secondary text-white"
+            placeholder="Ej: Mercado, Netflix..."
             value={filtros.busqueda}
             onChange={handleChange}
           />
         </div>
 
-        {/* 2. Categoría Contable */}
-        <div>
-          <label className="block text-xs font-semibold text-gray-600 mb-1">
-            Categoría
-          </label>
+        {/* Categoría */}
+        <div className="col-12 col-md-6 col-lg-3">
+          <label className="form-label text-white fw-light small">Categoría</label>
           <select
             name="categoria"
-            className="w-full text-xs p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
+            className="form-select bg-black border-secondary text-white"
             value={filtros.categoria}
             onChange={handleChange}
           >
             <option value="">Todas las categorías</option>
-            <option value="servicios">Servicios Públicos</option>
-            <option value="nomina">Nómina y Salarios</option>
-            <option value="proveedores">Compra de Insumos</option>
-            <option value="arriendo">Arrendamientos</option>
-            <option value="mantenimiento">Mantenimiento</option>
-            <option value="impuestos">Impuestos / Tasas</option>
-            <option value="otros">Otros Gastos</option>
+            {categorias.map((c) => (
+              <option key={c.id_categoria} value={c.id_categoria}>{c.nombre}</option>
+            ))}
           </select>
         </div>
 
-        {/* 3. Fecha Desde */}
-        <div>
-          <label className="block text-xs font-semibold text-gray-600 mb-1">
-            Fecha Desde
-          </label>
+        {/* Fecha desde */}
+        <div className="col-12 col-md-6 col-lg-2">
+          <label className="form-label text-white fw-light small">Fecha desde</label>
           <input
             type="date"
             name="fechaInicio"
-            className="w-full text-xs p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="form-control bg-black border-secondary text-white"
             value={filtros.fechaInicio}
             onChange={handleChange}
           />
         </div>
 
-        {/* 4. Fecha Hasta */}
-        <div>
-          <label className="block text-xs font-semibold text-gray-600 mb-1">
-            Fecha Hasta
-          </label>
+        {/* Fecha hasta */}
+        <div className="col-12 col-md-6 col-lg-2">
+          <label className="form-label text-white fw-light small">Fecha hasta</label>
           <input
             type="date"
             name="fechaFin"
-            className="w-full text-xs p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="form-control bg-black border-secondary text-white"
             value={filtros.fechaFin}
             onChange={handleChange}
           />
         </div>
 
-        {/* 5. Monto Máximo (o Rango de precio) */}
-        <div>
-          <label className="block text-xs font-semibold text-gray-600 mb-1">
-            Monto Máximo ($)
-          </label>
+        {/* Monto máximo */}
+        <div className="col-12 col-md-6 col-lg-2">
+          <label className="form-label text-white fw-light small">Monto máximo ($)</label>
           <input
             type="number"
             name="montoMax"
-            className="w-full text-xs p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="form-control bg-black border-secondary text-white"
             placeholder="Ej: 500000"
             value={filtros.montoMax}
             onChange={handleChange}
@@ -143,5 +120,5 @@ export default function FiltroGastos({ onFiltrar }) {
 
       </div>
     </div>
-  );
+  )
 }
