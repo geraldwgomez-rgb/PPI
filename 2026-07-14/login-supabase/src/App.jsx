@@ -42,7 +42,7 @@ function App() {
         <Route element={<Layout session={session} />}>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/usuarios" element={<UsuariosPage />} />
-          <Route path="/gastos" element={<GastosPage />} />
+          <Route path="/gastos" element={<GastosPage session={session} />} />
           <Route path="/ingresos" element={<IngresosPage />} />
           <Route path="/presupuestos" element={<PresupuestosPage />} />
           <Route path="/productos" element={<ProductosPage session={session} />} />
