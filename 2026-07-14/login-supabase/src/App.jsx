@@ -10,6 +10,7 @@ import GastosPage from './pages/GastosPage'
 import IngresosPage from './pages/IngresosPage'
 import PresupuestosPage from './pages/PresupuestosPage'
 import ProductosPage from './pages/ProductosPage'
+import CategoriasPage from './pages/CategoriasPage'
 import './index.css'
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
           <Route path="/ingresos" element={<IngresosPage />} />
           <Route path="/presupuestos" element={<PresupuestosPage />} />
           <Route path="/productos" element={<ProductosPage session={session} />} />
+          <Route path="/categorias" element={<CategoriasPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

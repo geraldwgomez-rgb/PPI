@@ -9,6 +9,7 @@ function Sidebar() {
       <Link className="sidebar__link" to="/ingresos">Ingresos</Link>
       <Link className="sidebar__link" to="/presupuestos">Presupuestos</Link>
       <Link className="sidebar__link" to="/productos">Productos</Link>
+
     </aside>
   )
 }
