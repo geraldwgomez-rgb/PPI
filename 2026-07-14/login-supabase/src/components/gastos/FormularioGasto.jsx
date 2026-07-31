@@ -39,7 +39,7 @@ export default function FormularioGasto({ session, onGastoAgregado }) {
       monto: Number(monto),
       tipo,
       fecha,
-      cedula_usuario: session.user.email,
+      user_id: session.user.id,
       id_categoria: idCategoria || null,
     }
     const { error } = await supabase.from('gastos').insert(nuevoGasto)

@@ -11,11 +11,10 @@ export default function ListaGastos({ session, recargar, filtros = {} }) {
 
   async function obtenerGastos() {
     setCargando(true)
-
     let query = supabase
       .from('gastos')
       .select('id_gasto, descripcion, tipo, monto, fecha, categoria ( nombre )')
-      .eq('cedula_usuario', session.user.email)
+      .eq('user_id', session.user.id)
       .order('fecha', { ascending: false })
 
     if (filtros.categoria) query = query.eq('id_categoria', filtros.categoria)
