@@ -1,5 +1,22 @@
-import { useState, useEffect } from 'react'
-import { supabase } from '../../lib/supabaseClient'
+import { useState } from 'react'
+
+const CATEGORIAS = [
+  'Alimentación',
+  'Arriendo / Vivienda',
+  'Servicios públicos',
+  'Transporte',
+  'Salud',
+  'Educación',
+  'Ropa y calzado',
+  'Entretenimiento / Ocio',
+  'Tecnología',
+  'Deudas / Créditos',
+  'Ahorro',
+  'Inversiones',
+  'Mascotas',
+  'Belleza / Cuidado personal',
+  'Otros',
+]
 
 export default function FiltroGastos({ onFiltrar }) {
   const [filtros, setFiltros] = useState({
@@ -9,18 +26,6 @@ export default function FiltroGastos({ onFiltrar }) {
     fechaFin: '',
     montoMax: ''
   })
-  const [categorias, setCategorias] = useState([])
-
-  useEffect(() => {
-    async function cargarCategorias() {
-      const { data } = await supabase
-        .from('categoria')
-        .select('id_categoria, nombre')
-        .in('tipo_movimiento', ['GASTO', 'AMBOS'])
-      if (data) setCategorias(data)
-    }
-    cargarCategorias()
-  }, [])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -52,7 +57,6 @@ export default function FiltroGastos({ onFiltrar }) {
 
       <div className="row g-3">
 
-        {/* Búsqueda */}
         <div className="col-12 col-md-6 col-lg-3">
           <label className="form-label text-white fw-light small">Buscar concepto</label>
           <input
@@ -65,7 +69,6 @@ export default function FiltroGastos({ onFiltrar }) {
           />
         </div>
 
-        {/* Categoría */}
         <div className="col-12 col-md-6 col-lg-3">
           <label className="form-label text-white fw-light small">Categoría</label>
           <select
@@ -75,13 +78,12 @@ export default function FiltroGastos({ onFiltrar }) {
             onChange={handleChange}
           >
             <option value="">Todas las categorías</option>
-            {categorias.map((c) => (
-              <option key={c.id_categoria} value={c.id_categoria}>{c.nombre}</option>
+            {CATEGORIAS.map((c) => (
+              <option key={c} value={c}>{c}</option>
             ))}
           </select>
         </div>
 
-        {/* Fecha desde */}
         <div className="col-12 col-md-6 col-lg-2">
           <label className="form-label text-white fw-light small">Fecha desde</label>
           <input
@@ -93,7 +95,6 @@ export default function FiltroGastos({ onFiltrar }) {
           />
         </div>
 
-        {/* Fecha hasta */}
         <div className="col-12 col-md-6 col-lg-2">
           <label className="form-label text-white fw-light small">Fecha hasta</label>
           <input
@@ -105,7 +106,6 @@ export default function FiltroGastos({ onFiltrar }) {
           />
         </div>
 
-        {/* Monto máximo */}
         <div className="col-12 col-md-6 col-lg-2">
           <label className="form-label text-white fw-light small">Monto máximo ($)</label>
           <input
