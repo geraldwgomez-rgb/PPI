@@ -10,7 +10,7 @@ import GastosPage from './pages/GastosPage'
 import IngresosPage from './pages/IngresosPage'
 import PresupuestosPage from './pages/PresupuestosPage'
 import ProductosPage from './pages/ProductosPage'
-import CategoriasPage from './pages/CategoriasPage'
+import CuentasPage from './pages/CuentasPage'
 import './index.css'
 
 function App() {
@@ -42,12 +42,12 @@ function App() {
       <Routes>
         <Route element={<Layout session={session} />}>
           <Route path="/" element={<DashboardPage />} />
-          <Route path="/usuarios" element={<UsuariosPage />} />
           <Route path="/gastos" element={<GastosPage session={session} />} />
-          <Route path="/ingresos" element={<IngresosPage />} />
-          <Route path="/presupuestos" element={<PresupuestosPage />} />
+          <Route path="/ingresos" element={<IngresosPage session={session} />} />
+          <Route path="/presupuestos" element={<PresupuestosPage session={session} />} />
+          <Route path="/cuentas" element={<CuentasPage session={session} />} />
           <Route path="/productos" element={<ProductosPage session={session} />} />
-          <Route path="/categorias" element={<CategoriasPage />} />
+          <Route path="/usuarios" element={<UsuariosPage session={session} />} />
         </Route>
       </Routes>
     </BrowserRouter>
