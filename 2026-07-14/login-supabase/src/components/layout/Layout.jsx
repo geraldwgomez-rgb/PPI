@@ -3,10 +3,10 @@ import Header from './Header'
 import Sidebar from './Sidebar'
 import Footer from './Footer'
 
-function Layout({ session }) {
+function Layout({ session, rol }) {
   return (
     <div className="app-layout">
-      <Sidebar />
+      <Sidebar rol={rol} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Header session={session} />
         <main className="main-content">
