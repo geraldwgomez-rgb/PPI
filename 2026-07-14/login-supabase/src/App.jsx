@@ -53,7 +53,7 @@ function App() {
         <Route element={<Layout session={session} rol={rol} />}>
 
           {/* Rutas comunes */}
-          <Route path="/" element={<DashboardPage />} />
+          <Route path="/" element={<DashboardPage session={session} />} />
           <Route path="/usuarios" element={<UsuariosPage session={session} />} />
 
           {/* Rutas solo USUARIO */}
