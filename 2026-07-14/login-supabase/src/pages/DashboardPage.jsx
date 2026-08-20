@@ -12,7 +12,6 @@ function getMesesDisponibles(fechaRegistro) {
   const inicio = new Date(fechaRegistro)
   const hoy = new Date()
   let actual = new Date(inicio.getFullYear(), inicio.getMonth(), 1)
-
   while (actual <= hoy) {
     meses.push({
       valor: `${actual.getFullYear()}-${String(actual.getMonth() + 1).padStart(2, '0')}`,
@@ -20,7 +19,6 @@ function getMesesDisponibles(fechaRegistro) {
     })
     actual.setMonth(actual.getMonth() + 1)
   }
-
   return meses.reverse()
 }
 
@@ -104,9 +102,7 @@ export default function DashboardPage({ session }) {
   return (
     <div className="container py-4">
       <div className="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-2">
-        <h2 className="text-info fw-bold m-0">📊 Dashboard</h2>
-
-        {/* Selector de mes */}
+        <h2 className="text-info fw-bold m-0">📊 Mi Resumen</h2>
         <select
           className="form-select bg-black border-secondary text-white"
           style={{ width: 'auto', minWidth: '200px' }}
@@ -118,8 +114,9 @@ export default function DashboardPage({ session }) {
           ))}
         </select>
       </div>
-
-      <p className="text-secondary mb-4">Resumen de <strong className="text-white">{labelMes}</strong></p>
+      <p className="text-secondary mb-4">
+        Resumen de <strong className="text-white">{labelMes}</strong>
+      </p>
 
       {cargando ? (
         <p className="text-secondary text-center mt-5">Cargando datos...</p>
@@ -131,12 +128,14 @@ export default function DashboardPage({ session }) {
               <div className="card bg-dark border-success border-opacity-50 p-4 text-center" style={{ borderRadius: '16px' }}>
                 <p className="text-secondary small mb-1">💰 Total Ingresos</p>
                 <h3 className="text-success fw-bold">$ {totalIngresos.toLocaleString('es-CO')}</h3>
+                <small className="text-secondary">{ingresosPorCategoria.length} categorías</small>
               </div>
             </div>
             <div className="col-12 col-md-4">
               <div className="card bg-dark border-danger border-opacity-50 p-4 text-center" style={{ borderRadius: '16px' }}>
                 <p className="text-secondary small mb-1">💸 Total Gastos</p>
                 <h3 className="text-danger fw-bold">$ {totalGastos.toLocaleString('es-CO')}</h3>
+                <small className="text-secondary">{gastosPorCategoria.length} categorías</small>
               </div>
             </div>
             <div className="col-12 col-md-4">
@@ -145,6 +144,9 @@ export default function DashboardPage({ session }) {
                 <h3 className={`fw-bold ${balance >= 0 ? 'text-info' : 'text-warning'}`}>
                   $ {balance.toLocaleString('es-CO')}
                 </h3>
+                <small className={balance >= 0 ? 'text-info' : 'text-warning'}>
+                  {balance >= 0 ? '✅ Positivo' : '⚠️ Negativo'}
+                </small>
               </div>
             </div>
           </div>
