@@ -14,6 +14,8 @@ import CuentasPage from './pages/CuentasPage'
 import AdminPage from './pages/AdminPage'
 import AdminUsuariosPage from './pages/AdminUsuariosPage'
 import AdminReportesPage from './pages/AdminReportesPage'
+import AdminSoportePage from './pages/AdminSoportePage'
+import SoportePage from './pages/SoportePage'
 import './index.css'
 
 function App() {
@@ -61,6 +63,7 @@ function App() {
               <Route path="/presupuestos" element={<PresupuestosPage session={session} />} />
               <Route path="/productos" element={<ProductosPage session={session} />} />
               <Route path="/usuarios" element={<UsuariosPage session={session} />} />
+              <Route path="/soporte" element={<SoportePage session={session} />} />
               <Route path="*" element={<Navigate to="/" />} />
             </>
           )}
@@ -71,6 +74,7 @@ function App() {
               <Route path="/" element={<AdminPage />} />
               <Route path="/admin/usuarios" element={<AdminUsuariosPage session={session} />} />
               <Route path="/admin/reportes" element={<AdminReportesPage />} />
+              <Route path="/admin/soporte" element={<AdminSoportePage session={session} />} />
               <Route path="/cuentas" element={<CuentasPage />} />
               <Route path="/usuarios" element={<UsuariosPage session={session} />} />
               <Route path="*" element={<Navigate to="/" />} />

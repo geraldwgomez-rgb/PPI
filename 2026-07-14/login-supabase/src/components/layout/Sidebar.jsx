@@ -7,6 +7,7 @@ const LINKS_USUARIO = [
   { to: '/ingresos',     emoji: '💰', label: 'Ingresos' },
   { to: '/presupuestos', emoji: '📋', label: 'Presupuestos' },
   { to: '/productos',    emoji: '📦', label: 'Productos' },
+  { to: '/soporte',      emoji: '💬', label: 'Soporte' },
   { to: '/usuarios',     emoji: '👤', label: 'Perfil' },
 ]
 
@@ -15,6 +16,7 @@ const LINKS_ADMIN = [
   { to: '/cuentas',         emoji: '🏦', label: 'Cuentas' },
   { to: '/admin/usuarios',  emoji: '👥', label: 'Usuarios' },
   { to: '/admin/reportes',  emoji: '📈', label: 'Reportes' },
+  { to: '/admin/soporte',   emoji: '💬', label: 'Soporte' },
   { to: '/usuarios',        emoji: '👤', label: 'Mi Perfil' },
 ]
 
