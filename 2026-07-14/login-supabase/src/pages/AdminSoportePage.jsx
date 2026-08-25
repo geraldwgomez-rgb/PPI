@@ -19,7 +19,7 @@ export default function AdminSoportePage({ session }) {
   async function cargarDatos() {
     setCargando(true)
     const { data: us } = await supabase
-      .from('usuarios_info')
+      .rpc('obtener_usuarios')
       .select('id, email, rol')
       .neq('id', session.user.id)
 

@@ -32,7 +32,7 @@ export default function AdminReportesPage() {
   useEffect(() => {
     async function cargarUsuarios() {
       const { data } = await supabase
-        .from('usuarios_info')
+        .rpc('obtener_usuarios')
         .select('id, email, rol, created_at')
       if (data) setUsuarios(data)
       setCargando(false)

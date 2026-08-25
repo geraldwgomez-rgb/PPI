@@ -13,9 +13,7 @@ export default function AdminUsuariosPage({ session }) {
   async function cargarUsuarios() {
     setCargando(true)
     const { data, error } = await supabase
-      .from('usuarios_info')
-      .select('*')
-      .order('created_at', { ascending: false })
+      .rpc('obtener_usuarios')
     if (error) console.error(error)
     else setUsuarios(data)
     setCargando(false)
