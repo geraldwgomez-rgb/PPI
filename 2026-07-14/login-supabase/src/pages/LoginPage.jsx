@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import ParticlesBackground from '.../components/ParticlesBackground'
 
 export default function LoginPage({ onLogin, onVolver }) {
   const [email, setEmail] = useState('')
@@ -22,67 +23,96 @@ export default function LoginPage({ onLogin, onVolver }) {
   }
 
   return (
-    <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-      <div className="row w-100 justify-content-center">
-        <div className="col-12 col-md-6 col-lg-4">
-          <div className="card bg-dark border-info border-opacity-50 shadow-lg p-4" style={{ borderRadius: '20px' }}>
-            <div className="card-body">
+    <>
+      {/* FONDO: partículas animadas (puntos + líneas en movimiento) */}
+      <ParticlesBackground particleCount={80} />
+      <div className="bg-slideshow__overlay"></div>
 
-              {/* Botón volver */}
-              <button
-                type="button"
-                className="btn btn-link text-secondary p-0 mb-3 d-flex align-items-center gap-1"
-                onClick={onVolver}
-              >
-                ← Volver al inicio
-              </button>
+      <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+        <div className="row w-100 justify-content-center">
+          <div className="col-12 col-md-6 col-lg-4">
+            <div
+              className="p-4"
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                border: '1px solid var(--border-glow)',
+                borderRadius: '20px',
+                boxShadow: 'var(--accent-glow), var(--shadow-elevated)',
+              }}
+            >
+              <div className="card-body">
 
-              <h2 className="text-info fw-bold text-center mb-4">
-                {isSignUp ? 'Crear cuenta' : 'Iniciar Sesión'}
-              </h2>
+                {/* Botón volver */}
+                <button
+                  type="button"
+                  className="btn btn-link text-secondary p-0 mb-3 d-flex align-items-center gap-1"
+                  onClick={onVolver}
+                >
+                  ← Volver al inicio
+                </button>
 
-              {errorMsg && (
-                <div className="alert alert-danger py-2 text-center small">{errorMsg}</div>
-              )}
+                <p className="eyebrow text-center mb-1">AUTENTICACIÓN SMC</p>
+                <h2 className="text-info fw-bold text-center mb-1">
+                  {isSignUp ? 'Crear cuenta' : 'Iniciar Sesión'}
+                </h2>
+                <p className="text-secondary text-center small mb-4">
+                  Accede a tu panel financiero
+                </p>
 
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label className="form-label text-white fw-light">Correo</label>
-                  <input
-                    type="email"
-                    className="form-control bg-black border-secondary text-white py-2"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="form-label text-white fw-light">Contraseña</label>
-                  <input
-                    type="password"
-                    className="form-control bg-black border-secondary text-white py-2"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
-                </div>
-                <div className="d-grid gap-2">
-                  <button type="submit" className="btn btn-info fw-bold py-2 text-uppercase" disabled={loading}>
-                    {loading ? 'Cargando...' : isSignUp ? 'Registrarme' : 'Ingresar'}
-                  </button>
-                </div>
-                <div className="mt-4 text-center">
-                  <button type="button" className="btn btn-link text-info small" onClick={() => setIsSignUp(!isSignUp)}>
-                    {isSignUp ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate'}
-                  </button>
-                </div>
-              </form>
+                {errorMsg && (
+                  <div className="alert alert-danger py-2 text-center small">{errorMsg}</div>
+                )}
 
+                <form onSubmit={handleSubmit}>
+                  <div className="mb-3">
+                    <label className="form-label text-white fw-light">Correo</label>
+                    <input
+                      type="email"
+                      className="form-control py-2"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="form-label text-white fw-light">Contraseña</label>
+                    <input
+                      type="password"
+                      className="form-control py-2"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                  <div className="d-grid gap-2">
+                    <button
+                      type="submit"
+                      className="fw-bold py-2 text-uppercase"
+                      style={{
+                        backgroundColor: 'var(--accent)',
+                        color: '#06131A',
+                        border: 'none',
+                        borderRadius: 'var(--radius-sm)',
+                        boxShadow: 'var(--accent-glow)',
+                      }}
+                      disabled={loading}
+                    >
+                      {loading ? 'Cargando...' : isSignUp ? 'Registrarme' : 'Ingresar'}
+                    </button>
+                  </div>
+                  <div className="mt-4 text-center">
+                    <button type="button" className="btn btn-link text-info small" onClick={() => setIsSignUp(!isSignUp)}>
+                      {isSignUp ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate'}
+                    </button>
+                  </div>
+                </form>
+
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
