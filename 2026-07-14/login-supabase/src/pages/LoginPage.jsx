@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
-import ParticlesBackground from '.../components/ParticlesBackground'
+import ParticlesBackground from '../components/ParticlesBackground'
 
 export default function LoginPage({ onLogin, onVolver }) {
   const [email, setEmail] = useState('')

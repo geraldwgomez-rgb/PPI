@@ -1,3 +1,4 @@
+
 cat > src/pages/LoginPage.jsx << 'EOF'
 import { useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
@@ -60,4 +61,3 @@ export default function LoginPage({ onLogin }) {
     </div>
   )
 }
-EOF
