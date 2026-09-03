@@ -1,34 +1,70 @@
 /* ============================================================
    SISTEMA SMC – index.css
-   Tema oscuro para sistema de control financiero
+   Identidad visual: dashboard oscuro estilo "orbital" —
+   azul marino profundo + acentos cian/teal, tarjetas con
+   resplandor sutil, headers con imagen de fondo + overlay.
+
+   ÍNDICE
+   1. Tokens de diseño (variables)
+   2. Overrides de Bootstrap (para que text-info, bg-dark,
+      btn-info, badge, etc. hereden la nueva paleta sin
+      tocar el JSX)
+   3. Reset básico
+   4. Tipografía
+   5. Layout general (sidebar, header, footer, main-content)
+   6. Tarjetas (card, kpi-card, glow-card)
+   7. Header tipo "hero" con imagen de fondo (portal / landing)
+   8. Tablas
+   9. Formularios
+   10. Botones
+   11. Badges
+   12. Modal
+   13. Barra de progreso
+   14. Scrollbar
+   15. Fondos animados (crossfade + Ken Burns)
+   16. Accesibilidad
+   17. Responsive
+   ============================================================ */
+
+
+/* ============================================================
+   1. TOKENS DE DISEÑO
    ============================================================ */
 
 :root {
   /* Fondos */
-  --bg-primary: #0F1115;
-  --bg-secondary: #171A21;
-  --bg-tertiary: #1F232C;
-  --bg-hover: #262B35;
+  --bg-primary: #0A0E14;      /* azul marino casi negro */
+  --bg-secondary: #10141C;    /* tarjetas */
+  --bg-tertiary: #161B26;     /* inputs, filas alternas */
+  --bg-hover: #1C222F;
 
   /* Bordes */
-  --border: #2A2F3A;
-  --border-light: #353B47;
+  --border: #1E2530;
+  --border-light: #2A3242;
+  --border-glow: rgba(34, 211, 238, 0.35); /* borde con resplandor cian */
 
   /* Texto */
-  --text-primary: #E8EAED;
-  --text-secondary: #8B92A0;
-  --text-muted: #5C6370;
+  --text-primary: #E8EDF2;
+  --text-secondary: #8B96A5;
+  --text-muted: #565F6E;
 
-  /* Acentos */
-  --accent: #34D399;        /* ingresos / éxito / acción principal */
-  --accent-hover: #2BBF8A;
-  --accent-soft: rgba(52, 211, 153, 0.12);
+  /* Acento principal: cian/teal (antes verde) */
+  --accent: #22D3EE;
+  --accent-hover: #0FB8D4;
+  --accent-soft: rgba(34, 211, 238, 0.12);
+  --accent-glow: 0 0 16px rgba(34, 211, 238, 0.25);
 
-  --danger: #F87171;        /* gastos / eliminar / error */
-  --danger-hover: #EF5454;
-  --danger-soft: rgba(248, 113, 113, 0.12);
+  /* Positivo (ingresos, variaciones +) */
+  --success: #2DD4A8;
+  --success-soft: rgba(45, 212, 168, 0.12);
 
-  --warning: #FBBF24;       /* alertas de presupuesto */
+  /* Negativo (gastos, variaciones -) */
+  --danger: #FF5C7A;
+  --danger-hover: #E4415F;
+  --danger-soft: rgba(255, 92, 122, 0.12);
+
+  /* Alertas */
+  --warning: #FBBF24;
   --warning-soft: rgba(251, 191, 36, 0.12);
 
   /* Tipografía */
@@ -40,15 +76,87 @@
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
-  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.4);
-  --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --shadow-elevated: 0 12px 40px rgba(0, 0, 0, 0.6);
 
-  /* Transición estándar */
   --transition: 150ms ease;
 }
 
+
 /* ============================================================
-   RESET BÁSICO
+   2. OVERRIDES DE BOOTSTRAP
+   Redirige las clases de Bootstrap que ya usas en el JSX
+   (text-info, border-info, bg-dark, btn-info, badge bg-danger…)
+   hacia la nueva paleta cian/teal, sin tocar los componentes.
+   ============================================================ */
+
+:root,
+[data-bs-theme="dark"] {
+  --bs-primary: var(--accent);
+  --bs-primary-rgb: 34, 211, 238;
+
+  --bs-info: var(--accent);
+  --bs-info-rgb: 34, 211, 238;
+
+  --bs-success: var(--success);
+  --bs-success-rgb: 45, 212, 168;
+
+  --bs-danger: var(--danger);
+  --bs-danger-rgb: 255, 92, 122;
+
+  --bs-warning: var(--warning);
+  --bs-warning-rgb: 251, 191, 36;
+
+  --bs-dark: var(--bg-secondary);
+  --bs-dark-rgb: 16, 20, 28;
+
+  --bs-body-bg: var(--bg-primary);
+  --bs-body-color: var(--text-primary);
+  --bs-border-color: var(--border);
+}
+
+/* Bootstrap usa .bg-dark / .border-info / .text-info como
+   utilidades — al quedar las variables remapeadas arriba,
+   estas ya toman el color correcto automáticamente. Reforzamos
+   los casos donde Bootstrap no usa variable sino color fijo: */
+
+.bg-dark {
+  background-color: var(--bg-secondary) !important;
+}
+
+.text-info {
+  color: var(--accent) !important;
+}
+
+.border-info {
+  border-color: var(--accent) !important;
+}
+
+.btn-outline-info {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn-outline-info:hover {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: #06131A;
+}
+
+.btn-info {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: #06131A;
+}
+
+.btn-info:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+
+/* ============================================================
+   3. RESET BÁSICO
    ============================================================ */
 
 * {
@@ -83,8 +191,9 @@ a:hover {
   text-decoration: underline;
 }
 
+
 /* ============================================================
-   TIPOGRAFÍA
+   4. TIPOGRAFÍA
    ============================================================ */
 
 h1, h2, h3, h4 {
@@ -98,6 +207,24 @@ h1 { font-size: 28px; }
 h2 { font-size: 22px; }
 h3 { font-size: 18px; }
 
+/* Títulos tipo "sección" en mayúsculas con tracking amplio,
+   como INTRODUCCIÓN / EL PROBLEMA / OBJETIVOS en la referencia */
+.section-title {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Etiqueta pequeña tipo "MISSION TELEMETRY // ..." de la referencia */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+
 p {
   color: var(--text-secondary);
 }
@@ -110,8 +237,9 @@ p {
   font-family: var(--font-mono);
 }
 
+
 /* ============================================================
-   LAYOUT GENERAL
+   5. LAYOUT GENERAL
    ============================================================ */
 
 .app-layout {
@@ -122,13 +250,10 @@ p {
 .main-content {
   flex: 1;
   padding: 24px 32px;
-  background-color: var(--bg-primary);
+  background-color: transparent;
 }
 
-/* ============================================================
-   HEADER
-   ============================================================ */
-
+/* HEADER (barra superior de la app interna) */
 .header {
   display: flex;
   align-items: center;
@@ -145,10 +270,7 @@ p {
   color: var(--text-primary);
 }
 
-/* ============================================================
-   SIDEBAR / MENÚ
-   ============================================================ */
-
+/* SIDEBAR / MENÚ */
 .sidebar {
   width: 240px;
   background-color: var(--bg-secondary);
@@ -181,12 +303,10 @@ p {
 .sidebar__link--active {
   background-color: var(--accent-soft);
   color: var(--accent);
+  box-shadow: inset 2px 0 0 var(--accent);
 }
 
-/* ============================================================
-   FOOTER
-   ============================================================ */
-
+/* FOOTER */
 .footer {
   padding: 16px 24px;
   text-align: center;
@@ -195,8 +315,9 @@ p {
   border-top: 1px solid var(--border);
 }
 
+
 /* ============================================================
-   TARJETAS (cards)
+   6. TARJETAS
    ============================================================ */
 
 .card {
@@ -215,8 +336,113 @@ p {
   border-left: 3px solid var(--danger);
 }
 
+/* Tarjeta de métrica (las 4 tarjetas superiores del portal:
+   Ingresos, Gastos, Balance, Variación) */
+.kpi-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--accent);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.kpi-card__label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.kpi-card__value {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.kpi-card__value--accent { color: var(--accent); }
+.kpi-card__value--success { color: var(--success); }
+.kpi-card__value--danger { color: var(--danger); }
+
+.kpi-card__delta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.kpi-card__delta--up { color: var(--success); }
+.kpi-card__delta--down { color: var(--danger); }
+
+/* Tarjeta con resplandor (para destacar algo puntual, ej. un
+   total muy importante o una alerta activa) */
+.glow-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius-md);
+  box-shadow: var(--accent-glow), var(--shadow-card);
+  padding: 20px;
+}
+
+
 /* ============================================================
-   TABLA
+   7. HEADER TIPO "HERO" (imagen de fondo + overlay)
+   Para el título del portal (después del login) y para
+   secciones de landing que quieras destacar con foto.
+   Es independiente de .bg-slideshow (ese es de página completa;
+   este es para un bloque puntual, ej. el encabezado del portal).
+   ============================================================ */
+
+.hero-header {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  padding: 40px 32px;
+  margin-bottom: 24px;
+  background-size: cover;
+  background-position: center;
+  isolation: isolate;
+}
+
+.hero-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 14, 20, 0.55) 0%,
+    rgba(10, 14, 20, 0.9) 100%
+  );
+  z-index: -1;
+}
+
+.hero-header__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.hero-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.hero-header p {
+  color: rgba(232, 237, 242, 0.75);
+  max-width: 640px;
+}
+
+
+/* ============================================================
+   8. TABLA
    ============================================================ */
 
 table {
@@ -226,10 +452,10 @@ table {
 
 thead th {
   text-align: left;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   color: var(--text-muted);
   padding: 12px 16px;
   border-bottom: 1px solid var(--border);
@@ -250,8 +476,9 @@ tbody tr:hover {
   background-color: var(--bg-tertiary);
 }
 
+
 /* ============================================================
-   FORMULARIOS
+   9. FORMULARIOS
    ============================================================ */
 
 label {
@@ -293,8 +520,24 @@ textarea:focus {
   margin-bottom: 16px;
 }
 
+/* Bootstrap: .form-control / .form-select ya vienen con fondo
+   claro por defecto — los alineamos al tema oscuro */
+.form-control,
+.form-select {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-soft) !important;
+}
+
+
 /* ============================================================
-   BOTONES
+   10. BOTONES
    ============================================================ */
 
 button {
@@ -310,7 +553,7 @@ button {
 
 .btn-primary {
   background-color: var(--accent);
-  color: #0F1115;
+  color: #06131A;
 }
 
 .btn-primary:hover {
@@ -337,8 +580,9 @@ button {
   background-color: var(--bg-hover);
 }
 
+
 /* ============================================================
-   BADGES (gasto/ingreso, estado)
+   11. BADGES
    ============================================================ */
 
 .badge {
@@ -350,8 +594,8 @@ button {
 }
 
 .badge--ingreso {
-  background-color: var(--accent-soft);
-  color: var(--accent);
+  background-color: var(--success-soft);
+  color: var(--success);
 }
 
 .badge--gasto {
@@ -364,14 +608,18 @@ button {
   color: var(--warning);
 }
 
+/* Badges de Bootstrap (bg-danger, bg-primary, etc.) heredan
+   la paleta nueva vía las variables --bs-* de la sección 2 */
+
+
 /* ============================================================
-   MODAL
+   12. MODAL
    ============================================================ */
 
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.65);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -388,8 +636,9 @@ button {
   box-shadow: var(--shadow-elevated);
 }
 
+
 /* ============================================================
-   BARRA DE PROGRESO (presupuesto)
+   13. BARRA DE PROGRESO (presupuesto)
    ============================================================ */
 
 .progress-track {
@@ -415,8 +664,9 @@ button {
   background-color: var(--danger);
 }
 
+
 /* ============================================================
-   SCROLLBAR (estética oscura)
+   14. SCROLLBAR
    ============================================================ */
 
 ::-webkit-scrollbar {
@@ -437,8 +687,107 @@ button {
   background: var(--text-muted);
 }
 
+
 /* ============================================================
-   ACCESIBILIDAD
+   15. FONDOS ANIMADOS (crossfade + Ken Burns)
+   Página principal, Login y App interna.
+
+   Coloca las 6 imágenes en: public/assets/backgrounds/
+   principal-1.png, principal-2.png
+   login-1.png, login-2.png
+   app-1.png, app-2.png
+   ============================================================ */
+
+.bg-slideshow {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+}
+
+.bg-slideshow__layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  animation-name: bg-crossfade, bg-kenburns;
+  animation-timing-function: ease-in-out, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+  animation-duration: 18s, 18s; /* 9s por imagen */
+  will-change: opacity, transform;
+}
+
+.bg-slideshow__layer:nth-child(1) {
+  animation-delay: 0s, 0s;
+}
+
+.bg-slideshow__layer:nth-child(2) {
+  animation-delay: 9s, 9s;
+}
+
+.bg-slideshow__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 14, 20, 0.75) 0%,
+    rgba(10, 14, 20, 0.88) 100%
+  );
+}
+
+@keyframes bg-crossfade {
+  0%    { opacity: 0; }
+  8%    { opacity: 1; }
+  42%   { opacity: 1; }
+  50%   { opacity: 0; }
+  100%  { opacity: 0; }
+}
+
+@keyframes bg-kenburns {
+  0%    { transform: scale(1); }
+  50%   { transform: scale(1.08); }
+  100%  { transform: scale(1); }
+}
+
+/* 1) Página principal (IndexPage) */
+.bg-slideshow--principal .bg-slideshow__layer:nth-child(1) {
+  background-image: url('/assets/backgrounds/principal-1.png');
+}
+.bg-slideshow--principal .bg-slideshow__layer:nth-child(2) {
+  background-image: url('/assets/backgrounds/principal-2.png');
+}
+
+/* 2) Login (LoginPage) */
+.bg-slideshow--login .bg-slideshow__layer:nth-child(1) {
+  background-image: url('/assets/backgrounds/login-1.png');
+}
+.bg-slideshow--login .bg-slideshow__layer:nth-child(2) {
+  background-image: url('/assets/backgrounds/login-2.png');
+}
+
+/* 3) App interna (Layout) */
+.bg-slideshow--app .bg-slideshow__layer:nth-child(1) {
+  background-image: url('/assets/backgrounds/app-1.png');
+}
+.bg-slideshow--app .bg-slideshow__layer:nth-child(2) {
+  background-image: url('/assets/backgrounds/app-2.png');
+}
+
+.bg-slideshow--app + .bg-slideshow__overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(10, 14, 20, 0.88) 0%,
+    rgba(10, 14, 20, 0.94) 100%
+  );
+}
+
+
+/* ============================================================
+   16. ACCESIBILIDAD
    ============================================================ */
 
 :focus-visible {
@@ -451,26 +800,99 @@ button {
     transition: none !important;
     animation: none !important;
   }
+
+  .bg-slideshow__layer:nth-child(1) {
+    opacity: 1;
+  }
 }
 
+
 /* ============================================================
-   RESPONSIVE
+   17. RESPONSIVE
    ============================================================ */
 
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 24px; }
+  .card, .kpi-card { padding: 16px; }
+  h1 { font-size: 24px; }
+  h2 { font-size: 20px; }
+  .hero-header { padding: 28px 24px; }
+  .hero-header h1 { font-size: 26px; }
+}
+
 @media (max-width: 768px) {
-  .app-layout {
-    flex-direction: column;
-  }
+  .app-layout { flex-direction: column; }
 
   .sidebar {
     width: 100%;
     flex-direction: row;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     border-right: none;
     border-bottom: 1px solid var(--border);
+    padding: 12px 8px;
+    gap: 6px;
   }
 
-  .main-content {
-    padding: 16px;
+  .sidebar__link {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  .main-content { padding: 16px; }
+
+  .header {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+
+  thead th, tbody td { padding: 10px 12px; font-size: 13px; }
+
+  .modal-content { max-width: 92vw; padding: 18px; }
+
+  @keyframes bg-kenburns {
+    0%    { transform: scale(1); }
+    50%   { transform: scale(1.04); }
+    100%  { transform: scale(1); }
+  }
+}
+
+@media (max-width: 480px) {
+  body { font-size: 14px; }
+  h1 { font-size: 20px; }
+  h2 { font-size: 18px; }
+  h3 { font-size: 16px; }
+  .main-content { padding: 12px; }
+  .card, .kpi-card { padding: 14px; border-radius: var(--radius-sm); }
+  .header__logo { font-size: 16px; }
+  button { font-size: 13px; padding: 9px 14px; }
+  .hero-header { padding: 20px 16px; border-radius: var(--radius-md); }
+  .hero-header h1 { font-size: 22px; }
+}
+
+@media (min-width: 1440px) {
+  .main-content { padding: 32px 48px; }
+  .container { max-width: 1200px; }
+}
+
+@media (max-width: 900px) and (orientation: landscape) {
+  .sidebar { padding: 8px 6px; }
+  .sidebar__link { padding: 6px 8px; }
+}
+
+@supports (-webkit-touch-callout: none) {
+  .bg-slideshow {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
 }
