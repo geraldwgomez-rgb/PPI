@@ -17,7 +17,7 @@ function IndexPage({ onEntrar }) {
         >
           <div className="container-fluid">
             <h1 className="navbar-brand fw-bold text-info fs-4 m-0 d-flex align-items-center gap-2">
-              💰 Sistema SMC
+              Sistema SMC
             </h1>
 
             {/* Pills de estado, estilo "LIVE ONLINE / SYS V4.2" */}

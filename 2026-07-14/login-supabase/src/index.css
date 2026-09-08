@@ -728,15 +728,39 @@ button {
   animation-delay: 9s, 9s;
 }
 
+/* Viñeta + grid sutil, para dar profundidad sobre las fotos de fondo
+   (capas apiladas: grid horizontal, grid vertical, viñeta radial,
+   degradado oscuro para legibilidad — todo en el mismo elemento) */
 .bg-slideshow__overlay {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(
-    180deg,
-    rgba(10, 14, 20, 0.75) 0%,
-    rgba(10, 14, 20, 0.88) 100%
-  );
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(34, 211, 238, 0.035) 0px,
+      rgba(34, 211, 238, 0.035) 1px,
+      transparent 1px,
+      transparent 42px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(34, 211, 238, 0.035) 0px,
+      rgba(34, 211, 238, 0.035) 1px,
+      transparent 1px,
+      transparent 42px
+    ),
+    radial-gradient(
+      ellipse at center,
+      transparent 0%,
+      rgba(10, 14, 20, 0.45) 75%,
+      rgba(10, 14, 20, 0.7) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(10, 14, 20, 0.7) 0%,
+      rgba(10, 14, 20, 0.85) 100%
+    );
 }
 
 @keyframes bg-crossfade {
@@ -778,11 +802,32 @@ button {
 }
 
 .bg-slideshow--app + .bg-slideshow__overlay {
-  background: linear-gradient(
-    180deg,
-    rgba(10, 14, 20, 0.88) 0%,
-    rgba(10, 14, 20, 0.94) 100%
-  );
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(34, 211, 238, 0.03) 0px,
+      rgba(34, 211, 238, 0.03) 1px,
+      transparent 1px,
+      transparent 42px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(34, 211, 238, 0.03) 0px,
+      rgba(34, 211, 238, 0.03) 1px,
+      transparent 1px,
+      transparent 42px
+    ),
+    radial-gradient(
+      ellipse at center,
+      transparent 0%,
+      rgba(10, 14, 20, 0.6) 75%,
+      rgba(10, 14, 20, 0.85) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(10, 14, 20, 0.88) 0%,
+      rgba(10, 14, 20, 0.94) 100%
+    );
 }
 
 
@@ -804,6 +849,104 @@ button {
   .bg-slideshow__layer:nth-child(1) {
     opacity: 1;
   }
+
+  .intro-splash__letter,
+  .intro-splash__tagline {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
+
+
+/* ============================================================
+   17.5. INTRO SPLASH (animación tipo Netflix, antes de entrar)
+   ============================================================ */
+
+.intro-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, #10141C 0%, #0A0E14 100%);
+  transition: opacity 0.6s ease;
+}
+
+.intro-splash--exit {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-splash__logo {
+  display: flex;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: 88px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.intro-splash__letter {
+  display: inline-block;
+  color: var(--accent);
+  text-shadow: 0 0 30px rgba(34, 211, 238, 0.6), 0 0 60px rgba(34, 211, 238, 0.3);
+  opacity: 0;
+  transform: translateY(40px) scale(0.8);
+  animation: intro-letter-in 0.7s ease forwards;
+  animation-delay: calc(var(--i) * 0.15s);
+}
+
+@keyframes intro-letter-in {
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.intro-splash--hold .intro-splash__letter {
+  animation: intro-letter-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes intro-letter-pulse {
+  0%, 100% { text-shadow: 0 0 30px rgba(34, 211, 238, 0.6), 0 0 60px rgba(34, 211, 238, 0.3); }
+  50%      { text-shadow: 0 0 46px rgba(34, 211, 238, 0.9), 0 0 90px rgba(34, 211, 238, 0.5); }
+}
+
+.intro-splash--exit .intro-splash__letter {
+  animation: intro-letter-break 1s ease forwards;
+}
+
+@keyframes intro-letter-break {
+  to {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.4);
+    filter: blur(4px);
+  }
+}
+
+.intro-splash__tagline {
+  margin-top: 18px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 0;
+  animation: intro-tagline-in 0.6s ease forwards;
+  animation-delay: 0.7s;
+}
+
+.intro-splash--exit .intro-splash__tagline {
+  animation: intro-tagline-out 0.5s ease forwards;
+}
+
+@keyframes intro-tagline-in { to { opacity: 1; } }
+@keyframes intro-tagline-out { to { opacity: 0; } }
+
+@media (max-width: 480px) {
+  .intro-splash__logo { font-size: 52px; gap: 6px; }
+  .intro-splash__tagline { font-size: 10px; letter-spacing: 0.2em; }
 }
 
 

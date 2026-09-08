@@ -5,7 +5,7 @@ import {
   PieChart, Pie, Cell, Legend
 } from 'recharts'
 
-const COLORES = ['#0dcaf0', '#20c997', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14', '#0d6efd', '#d63384']
+const COLORES = ['#22D3EE', '#2DD4A8', '#FBBF24', '#FF5C7A', '#A78BFA', '#FD7E14', '#60A5FA', '#F472B6']
 
 export default function AdminPage() {
   const [stats, setStats] = useState({
@@ -27,13 +27,8 @@ export default function AdminPage() {
   async function cargarDatos() {
     setCargando(true)
 
-    // Total usuarios
     const { data: roles } = await supabase.from('roles').select('id, rol, created_at')
-
-    // Total gastos globales
     const { data: gastos } = await supabase.from('gastos').select('monto, categoria_nombre')
-
-    // Total ingresos globales
     const { data: ingresos } = await supabase.from('ingresos').select('monto, categoria_nombre')
 
     const sumGastos = gastos?.reduce((acc, g) => acc + Number(g.monto), 0) || 0
@@ -48,7 +43,6 @@ export default function AdminPage() {
 
     setUsuarios(roles || [])
 
-    // Gastos por categoría
     const mapGastos = {}
     gastos?.forEach((g) => {
       const cat = g.categoria_nombre || 'Sin categoría'
@@ -56,7 +50,6 @@ export default function AdminPage() {
     })
     setGastosPorCategoria(Object.entries(mapGastos).map(([name, value]) => ({ name, value })))
 
-    // Ingresos por categoría
     const mapIngresos = {}
     ingresos?.forEach((i) => {
       const cat = i.categoria_nombre || 'Sin categoría'
@@ -77,61 +70,77 @@ export default function AdminPage() {
 
   return (
     <div className="container py-4">
-      <h2 className="text-danger fw-bold mb-1">⚙️ Panel Administrador</h2>
-      <p className="text-secondary mb-4">Estadísticas globales del sistema SMC</p>
 
-      {/* TARJETAS */}
-      <div className="row g-4 mb-5">
-        <div className="col-12 col-md-3">
-          <div className="card bg-dark border-info border-opacity-50 p-4 text-center" style={{ borderRadius: '16px' }}>
-            <p className="text-secondary small mb-1">👥 Total Usuarios</p>
-            <h3 className="text-info fw-bold">{stats.totalUsuarios}</h3>
+      {/* ==================== HERO / ENCABEZADO DEL PORTAL ==================== */}
+      <section className="hero-header">
+        <p className="hero-header__eyebrow">PANEL ADMINISTRADOR // SISTEMA SMC</p>
+        <h1>Portal Contable y Financiero SMC</h1>
+        <p>Estadísticas globales del sistema — control de ingresos, gastos y usuarios en tiempo real.</p>
+      </section>
+
+      {/* ==================== KPI CARDS ==================== */}
+      <div className="row g-3 mb-4">
+        <div className="col-6 col-md-3">
+          <div className="kpi-card h-100">
+            <div className="kpi-card__label">Total Usuarios</div>
+            <div className="kpi-card__value kpi-card__value--accent">{stats.totalUsuarios}</div>
           </div>
         </div>
-        <div className="col-12 col-md-3">
-          <div className="card bg-dark border-success border-opacity-50 p-4 text-center" style={{ borderRadius: '16px' }}>
-            <p className="text-secondary small mb-1">💰 Total Ingresos</p>
-            <h3 className="text-success fw-bold">$ {stats.totalIngresos.toLocaleString('es-CO')}</h3>
+        <div className="col-6 col-md-3">
+          <div className="kpi-card h-100">
+            <div className="kpi-card__label">Total Ingresos</div>
+            <div className="kpi-card__value kpi-card__value--success">$ {stats.totalIngresos.toLocaleString('es-CO')}</div>
           </div>
         </div>
-        <div className="col-12 col-md-3">
-          <div className="card bg-dark border-danger border-opacity-50 p-4 text-center" style={{ borderRadius: '16px' }}>
-            <p className="text-secondary small mb-1">💸 Total Gastos</p>
-            <h3 className="text-danger fw-bold">$ {stats.totalGastos.toLocaleString('es-CO')}</h3>
+        <div className="col-6 col-md-3">
+          <div className="kpi-card h-100">
+            <div className="kpi-card__label">Total Gastos</div>
+            <div className="kpi-card__value kpi-card__value--danger">$ {stats.totalGastos.toLocaleString('es-CO')}</div>
           </div>
         </div>
-        <div className="col-12 col-md-3">
-          <div className={`card bg-dark p-4 text-center border-opacity-50 ${stats.balance >= 0 ? 'border-warning' : 'border-secondary'}`} style={{ borderRadius: '16px' }}>
-            <p className="text-secondary small mb-1">⚖️ Balance Global</p>
-            <h3 className={`fw-bold ${stats.balance >= 0 ? 'text-warning' : 'text-secondary'}`}>
+        <div className="col-6 col-md-3">
+          <div className="kpi-card h-100">
+            <div className="kpi-card__label">Balance Global</div>
+            <div className={`kpi-card__value ${stats.balance >= 0 ? 'kpi-card__value--accent' : 'kpi-card__value--danger'}`}>
               $ {stats.balance.toLocaleString('es-CO')}
-            </h3>
+            </div>
+            <div className={`kpi-card__delta ${stats.balance >= 0 ? 'kpi-card__delta--up' : 'kpi-card__delta--down'}`}>
+              {stats.balance >= 0 ? '▲ Positivo' : '▼ Negativo'}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* GRÁFICO BARRAS */}
-      <div className="card bg-dark border-secondary p-4 mb-4" style={{ borderRadius: '16px' }}>
-        <h5 className="text-white mb-3">📊 Comparativa global</h5>
-        <ResponsiveContainer width="100%" height={250}>
+      {/* ==================== GRÁFICO DE FLUJO (comparativa) ==================== */}
+      <div className="card mb-4">
+        <p className="eyebrow mb-1">FLUJO DE EFECTIVO</p>
+        <h5 className="text-white mb-3">Comparativa global — Ingresos, Gastos y Balance</h5>
+        <ResponsiveContainer width="100%" height={260}>
           <BarChart data={comparativa}>
-            <XAxis dataKey="name" stroke="#8b92a0" />
-            <YAxis stroke="#8b92a0" tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-            <Tooltip formatter={(v) => `$ ${Number(v).toLocaleString('es-CO')}`} contentStyle={{ backgroundColor: '#1F232C', border: '1px solid #2A2F3A' }} />
+            <XAxis dataKey="name" stroke="#565F6E" />
+            <YAxis stroke="#565F6E" tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+            <Tooltip
+              formatter={(v) => `$ ${Number(v).toLocaleString('es-CO')}`}
+              contentStyle={{ backgroundColor: '#10141C', border: '1px solid #1E2530', borderRadius: '8px' }}
+            />
             <Bar dataKey="monto" radius={[6, 6, 0, 0]}>
               {comparativa.map((entry, index) => (
-                <Cell key={index} fill={entry.name === 'Ingresos' ? '#20c997' : entry.name === 'Gastos' ? '#dc3545' : '#ffc107'} />
+                <Cell
+                  key={index}
+                  fill={entry.name === 'Ingresos' ? '#2DD4A8' : entry.name === 'Gastos' ? '#FF5C7A' : '#22D3EE'}
+                />
               ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      {/* GRÁFICOS TORTA */}
+      {/* ==================== COMPOSICIÓN (tortas) ==================== */}
       <div className="row g-4 mb-4">
         <div className="col-12 col-md-6">
-          <div className="card bg-dark border-secondary p-4" style={{ borderRadius: '16px' }}>
-            <h5 className="text-white mb-3">💸 Gastos por categoría</h5>
+          <div className="card h-100">
+            <p className="eyebrow mb-1">COMPOSICIÓN</p>
+            <h5 className="text-white mb-3">Gastos por categoría</h5>
             {gastosPorCategoria.length === 0 ? (
               <p className="text-secondary text-center">Sin datos</p>
             ) : (
@@ -140,7 +149,10 @@ export default function AdminPage() {
                   <Pie data={gastosPorCategoria} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                     {gastosPorCategoria.map((_, i) => (<Cell key={i} fill={COLORES[i % COLORES.length]} />))}
                   </Pie>
-                  <Tooltip formatter={(v) => `$ ${Number(v).toLocaleString('es-CO')}`} contentStyle={{ backgroundColor: '#1F232C', border: '1px solid #2A2F3A' }} />
+                  <Tooltip
+                    formatter={(v) => `$ ${Number(v).toLocaleString('es-CO')}`}
+                    contentStyle={{ backgroundColor: '#10141C', border: '1px solid #1E2530', borderRadius: '8px' }}
+                  />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -148,8 +160,9 @@ export default function AdminPage() {
           </div>
         </div>
         <div className="col-12 col-md-6">
-          <div className="card bg-dark border-secondary p-4" style={{ borderRadius: '16px' }}>
-            <h5 className="text-white mb-3">💰 Ingresos por categoría</h5>
+          <div className="card h-100">
+            <p className="eyebrow mb-1">COMPOSICIÓN</p>
+            <h5 className="text-white mb-3">Ingresos por categoría</h5>
             {ingresosPorCategoria.length === 0 ? (
               <p className="text-secondary text-center">Sin datos</p>
             ) : (
@@ -158,7 +171,10 @@ export default function AdminPage() {
                   <Pie data={ingresosPorCategoria} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                     {ingresosPorCategoria.map((_, i) => (<Cell key={i} fill={COLORES[i % COLORES.length]} />))}
                   </Pie>
-                  <Tooltip formatter={(v) => `$ ${Number(v).toLocaleString('es-CO')}`} contentStyle={{ backgroundColor: '#1F232C', border: '1px solid #2A2F3A' }} />
+                  <Tooltip
+                    formatter={(v) => `$ ${Number(v).toLocaleString('es-CO')}`}
+                    contentStyle={{ backgroundColor: '#10141C', border: '1px solid #1E2530', borderRadius: '8px' }}
+                  />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -167,15 +183,16 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* TABLA DE USUARIOS */}
-      <div className="card bg-dark border-secondary p-4" style={{ borderRadius: '16px' }}>
-        <h5 className="text-white mb-3">👥 Usuarios registrados</h5>
-        <table className="table table-dark table-bordered table-hover align-middle">
+      {/* ==================== TABLA (últimos movimientos / usuarios) ==================== */}
+      <div className="card">
+        <p className="eyebrow mb-1">REGISTRO</p>
+        <h5 className="text-white mb-3">Usuarios registrados</h5>
+        <table>
           <thead>
             <tr>
-              <th className="text-danger">ID</th>
-              <th className="text-danger">Rol</th>
-              <th className="text-danger">Registrado</th>
+              <th>ID</th>
+              <th>Rol</th>
+              <th>Registrado</th>
             </tr>
           </thead>
           <tbody>
@@ -183,7 +200,13 @@ export default function AdminPage() {
               <tr key={u.id}>
                 <td className="text-secondary small">{u.id}</td>
                 <td>
-                  <span className={`badge ${u.rol === 'administrador' ? 'bg-danger' : 'bg-primary'}`}>
+                  <span
+                    className="badge"
+                    style={{
+                      backgroundColor: u.rol === 'administrador' ? 'var(--danger-soft)' : 'var(--accent-soft)',
+                      color: u.rol === 'administrador' ? 'var(--danger)' : 'var(--accent)',
+                    }}
+                  >
                     {u.rol}
                   </span>
                 </td>

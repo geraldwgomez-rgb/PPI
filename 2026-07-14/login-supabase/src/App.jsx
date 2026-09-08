@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { supabase } from './lib/supabaseClient'
 import Layout from './components/layout/Layout'
+import IntroSplash from './components/IntroSplash'
 import IndexPage from './pages/IndexPage'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
@@ -22,6 +23,7 @@ function App() {
   const [session, setSession] = useState(null)
   const [rol, setRol] = useState(null)
   const [verIndex, setVerIndex] = useState(true)
+  const [showIntro, setShowIntro] = useState(true)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -45,8 +47,21 @@ function App() {
     if (data) setRol(data.rol)
   }
 
+  // Se llama cuando el login (o registro) es exitoso: guarda la
+  // sesión y vuelve a mostrar el intro antes de entrar al dashboard.
+  function handleLoginSuccess(newSession) {
+    setSession(newSession)
+    setShowIntro(true)
+  }
+
+  // Intro tipo Netflix: se muestra al cargar la app por primera vez,
+  // y también cada vez que se inicia sesión exitosamente.
+  if (showIntro) {
+    return <IntroSplash onFinish={() => setShowIntro(false)} />
+  }
+
   if (verIndex && !session) return <IndexPage onEntrar={() => setVerIndex(false)} />
-  if (!session) return <LoginPage onLogin={setSession} onVolver={() => setVerIndex(true)} />
+  if (!session) return <LoginPage onLogin={handleLoginSuccess} onVolver={() => setVerIndex(true)} />
   if (!rol) return <p className="text-white text-center mt-5">Cargando...</p>
 
   return (

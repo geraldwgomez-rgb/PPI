@@ -5,7 +5,7 @@ import {
   PieChart, Pie, Cell, Legend
 } from 'recharts'
 
-const COLORES = ['#0dcaf0', '#20c997', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14', '#0d6efd', '#d63384']
+const COLORES = ['#22D3EE', '#2DD4A8', '#FBBF24', '#FF5C7A', '#A78BFA', '#FD7E14', '#60A5FA', '#F472B6']
 
 function getMesesDisponibles(fechaRegistro) {
   const meses = []
@@ -101,78 +101,93 @@ export default function DashboardPage({ session }) {
 
   return (
     <div className="container py-4">
-      <div className="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-2">
-        <h2 className="text-info fw-bold m-0">📊 Mi Resumen</h2>
-        <select
-          className="form-select bg-black border-secondary text-white"
-          style={{ width: 'auto', minWidth: '200px' }}
-          value={mesSeleccionado}
-          onChange={(e) => setMesSeleccionado(e.target.value)}
-        >
-          {meses.map((m) => (
-            <option key={m.valor} value={m.valor}>{m.label}</option>
-          ))}
-        </select>
-      </div>
-      <p className="text-secondary mb-4">
-        Resumen de <strong className="text-white">{labelMes}</strong>
-      </p>
+
+      {/* ==================== HERO / ENCABEZADO DEL PORTAL ==================== */}
+      <section className="hero-header">
+        <div className="d-flex justify-content-between align-items-start flex-wrap gap-3">
+          <div>
+            <p className="hero-header__eyebrow">MI PORTAL // SISTEMA SMC</p>
+            <h1 className="mb-1">Mi Resumen Financiero</h1>
+            <p className="m-0">
+              Resumen de <strong style={{ color: '#fff' }}>{labelMes}</strong>
+            </p>
+          </div>
+          <select
+            className="form-select"
+            style={{ width: 'auto', minWidth: '200px' }}
+            value={mesSeleccionado}
+            onChange={(e) => setMesSeleccionado(e.target.value)}
+          >
+            {meses.map((m) => (
+              <option key={m.valor} value={m.valor}>{m.label}</option>
+            ))}
+          </select>
+        </div>
+      </section>
 
       {cargando ? (
         <p className="text-secondary text-center mt-5">Cargando datos...</p>
       ) : (
         <>
-          {/* TARJETAS */}
-          <div className="row g-4 mb-5">
+          {/* ==================== KPI CARDS ==================== */}
+          <div className="row g-3 mb-4">
             <div className="col-12 col-md-4">
-              <div className="card bg-dark border-success border-opacity-50 p-4 text-center" style={{ borderRadius: '16px' }}>
-                <p className="text-secondary small mb-1">💰 Total Ingresos</p>
-                <h3 className="text-success fw-bold">$ {totalIngresos.toLocaleString('es-CO')}</h3>
-                <small className="text-secondary">{ingresosPorCategoria.length} categorías</small>
+              <div className="kpi-card h-100">
+                <div className="kpi-card__label">Total Ingresos</div>
+                <div className="kpi-card__value kpi-card__value--success">$ {totalIngresos.toLocaleString('es-CO')}</div>
+                <div className="kpi-card__delta">{ingresosPorCategoria.length} categorías</div>
               </div>
             </div>
             <div className="col-12 col-md-4">
-              <div className="card bg-dark border-danger border-opacity-50 p-4 text-center" style={{ borderRadius: '16px' }}>
-                <p className="text-secondary small mb-1">💸 Total Gastos</p>
-                <h3 className="text-danger fw-bold">$ {totalGastos.toLocaleString('es-CO')}</h3>
-                <small className="text-secondary">{gastosPorCategoria.length} categorías</small>
+              <div className="kpi-card h-100">
+                <div className="kpi-card__label">Total Gastos</div>
+                <div className="kpi-card__value kpi-card__value--danger">$ {totalGastos.toLocaleString('es-CO')}</div>
+                <div className="kpi-card__delta">{gastosPorCategoria.length} categorías</div>
               </div>
             </div>
             <div className="col-12 col-md-4">
-              <div className={`card bg-dark p-4 text-center border-opacity-50 ${balance >= 0 ? 'border-info' : 'border-warning'}`} style={{ borderRadius: '16px' }}>
-                <p className="text-secondary small mb-1">⚖️ Balance</p>
-                <h3 className={`fw-bold ${balance >= 0 ? 'text-info' : 'text-warning'}`}>
+              <div className="kpi-card h-100">
+                <div className="kpi-card__label">Balance</div>
+                <div className={`kpi-card__value ${balance >= 0 ? 'kpi-card__value--accent' : 'kpi-card__value--danger'}`}>
                   $ {balance.toLocaleString('es-CO')}
-                </h3>
-                <small className={balance >= 0 ? 'text-info' : 'text-warning'}>
-                  {balance >= 0 ? '✅ Positivo' : '⚠️ Negativo'}
-                </small>
+                </div>
+                <div className={`kpi-card__delta ${balance >= 0 ? 'kpi-card__delta--up' : 'kpi-card__delta--down'}`}>
+                  {balance >= 0 ? '▲ Positivo' : '▼ Negativo'}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* GRÁFICO BARRAS */}
-          <div className="card bg-dark border-secondary p-4 mb-4" style={{ borderRadius: '16px' }}>
-            <h5 className="text-white mb-3">📊 Comparativa del mes</h5>
+          {/* ==================== GRÁFICO DE FLUJO ==================== */}
+          <div className="card mb-4">
+            <p className="eyebrow mb-1">FLUJO DE EFECTIVO</p>
+            <h5 className="text-white mb-3">Comparativa del mes</h5>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={comparativa}>
-                <XAxis dataKey="name" stroke="#8b92a0" />
-                <YAxis stroke="#8b92a0" tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-                <Tooltip formatter={(v) => `$ ${Number(v).toLocaleString('es-CO')}`} contentStyle={{ backgroundColor: '#1F232C', border: '1px solid #2A2F3A' }} />
+                <XAxis dataKey="name" stroke="#565F6E" />
+                <YAxis stroke="#565F6E" tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                <Tooltip
+                  formatter={(v) => `$ ${Number(v).toLocaleString('es-CO')}`}
+                  contentStyle={{ backgroundColor: '#10141C', border: '1px solid #1E2530', borderRadius: '8px' }}
+                />
                 <Bar dataKey="monto" radius={[6, 6, 0, 0]}>
                   {comparativa.map((entry, index) => (
-                    <Cell key={index} fill={entry.name === 'Ingresos' ? '#20c997' : entry.name === 'Gastos' ? '#dc3545' : '#0dcaf0'} />
+                    <Cell
+                      key={index}
+                      fill={entry.name === 'Ingresos' ? '#2DD4A8' : entry.name === 'Gastos' ? '#FF5C7A' : '#22D3EE'}
+                    />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          {/* GRÁFICOS TORTA */}
+          {/* ==================== COMPOSICIÓN (tortas) ==================== */}
           <div className="row g-4">
             <div className="col-12 col-md-6">
-              <div className="card bg-dark border-secondary p-4" style={{ borderRadius: '16px' }}>
-                <h5 className="text-white mb-3">💸 Gastos por categoría</h5>
+              <div className="card h-100">
+                <p className="eyebrow mb-1">COMPOSICIÓN</p>
+                <h5 className="text-white mb-3">Gastos por categoría</h5>
                 {gastosPorCategoria.length === 0 ? (
                   <p className="text-secondary text-center">Sin gastos este mes</p>
                 ) : (
@@ -181,7 +196,10 @@ export default function DashboardPage({ session }) {
                       <Pie data={gastosPorCategoria} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                         {gastosPorCategoria.map((_, i) => (<Cell key={i} fill={COLORES[i % COLORES.length]} />))}
                       </Pie>
-                      <Tooltip formatter={(v) => `$ ${Number(v).toLocaleString('es-CO')}`} contentStyle={{ backgroundColor: '#1F232C', border: '1px solid #2A2F3A' }} />
+                      <Tooltip
+                        formatter={(v) => `$ ${Number(v).toLocaleString('es-CO')}`}
+                        contentStyle={{ backgroundColor: '#10141C', border: '1px solid #1E2530', borderRadius: '8px' }}
+                      />
                       <Legend />
                     </PieChart>
                   </ResponsiveContainer>
@@ -189,8 +207,9 @@ export default function DashboardPage({ session }) {
               </div>
             </div>
             <div className="col-12 col-md-6">
-              <div className="card bg-dark border-secondary p-4" style={{ borderRadius: '16px' }}>
-                <h5 className="text-white mb-3">💰 Ingresos por categoría</h5>
+              <div className="card h-100">
+                <p className="eyebrow mb-1">COMPOSICIÓN</p>
+                <h5 className="text-white mb-3">Ingresos por categoría</h5>
                 {ingresosPorCategoria.length === 0 ? (
                   <p className="text-secondary text-center">Sin ingresos este mes</p>
                 ) : (
@@ -199,7 +218,10 @@ export default function DashboardPage({ session }) {
                       <Pie data={ingresosPorCategoria} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                         {ingresosPorCategoria.map((_, i) => (<Cell key={i} fill={COLORES[i % COLORES.length]} />))}
                       </Pie>
-                      <Tooltip formatter={(v) => `$ ${Number(v).toLocaleString('es-CO')}`} contentStyle={{ backgroundColor: '#1F232C', border: '1px solid #2A2F3A' }} />
+                      <Tooltip
+                        formatter={(v) => `$ ${Number(v).toLocaleString('es-CO')}`}
+                        contentStyle={{ backgroundColor: '#10141C', border: '1px solid #1E2530', borderRadius: '8px' }}
+                      />
                       <Legend />
                     </PieChart>
                   </ResponsiveContainer>
