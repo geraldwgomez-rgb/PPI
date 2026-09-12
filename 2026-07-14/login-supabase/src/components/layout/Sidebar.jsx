@@ -2,22 +2,21 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 
 const LINKS_USUARIO = [
-  { to: '/',             emoji: '📊', label: 'Mi Resumen' },
-  { to: '/gastos',       emoji: '💸', label: 'Gastos' },
-  { to: '/ingresos',     emoji: '💰', label: 'Ingresos' },
+  { to: '/', emoji: '📊', label: 'Mi Resumen' },
+  { to: '/gastos', emoji: '💸', label: 'Gastos' },
+  { to: '/ingresos', emoji: '💰', label: 'Ingresos' },
   { to: '/presupuestos', emoji: '📋', label: 'Presupuestos' },
-  { to: '/productos',    emoji: '📦', label: 'Productos' },
-  { to: '/soporte',      emoji: '💬', label: 'Soporte' },
-  { to: '/usuarios',     emoji: '👤', label: 'Perfil' },
+  { to: '/soporte', emoji: '💬', label: 'Soporte' },
+  { to: '/usuarios', emoji: '👤', label: 'Perfil' },
 ]
 
 const LINKS_ADMIN = [
-  { to: '/',                emoji: '⚙️', label: 'Panel Admin' },
-  { to: '/cuentas',         emoji: '🏦', label: 'Cuentas' },
-  { to: '/admin/usuarios',  emoji: '👥', label: 'Usuarios' },
-  { to: '/admin/reportes',  emoji: '📈', label: 'Reportes' },
-  { to: '/admin/soporte',   emoji: '💬', label: 'Soporte' },
-  { to: '/usuarios',        emoji: '👤', label: 'Mi Perfil' },
+  { to: '/', emoji: '⚙️', label: 'Panel Admin' },
+  { to: '/cuentas', emoji: '🏦', label: 'Cuentas' },
+  { to: '/admin/usuarios', emoji: '👥', label: 'Usuarios' },
+  { to: '/admin/reportes', emoji: '📈', label: 'Reportes' },
+  { to: '/admin/soporte', emoji: '💬', label: 'Soporte' },
+  { to: '/usuarios', emoji: '👤', label: 'Mi Perfil' },
 ]
 
 function Sidebar({ rol }) {

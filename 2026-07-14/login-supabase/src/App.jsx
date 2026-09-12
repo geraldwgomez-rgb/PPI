@@ -10,7 +10,6 @@ import UsuariosPage from './pages/UsuariosPage'
 import GastosPage from './pages/GastosPage'
 import IngresosPage from './pages/IngresosPage'
 import PresupuestosPage from './pages/PresupuestosPage'
-import ProductosPage from './pages/ProductosPage'
 import CuentasPage from './pages/CuentasPage'
 import AdminPage from './pages/AdminPage'
 import AdminUsuariosPage from './pages/AdminUsuariosPage'
@@ -76,7 +75,6 @@ function App() {
               <Route path="/gastos" element={<GastosPage session={session} />} />
               <Route path="/ingresos" element={<IngresosPage session={session} />} />
               <Route path="/presupuestos" element={<PresupuestosPage session={session} />} />
-              <Route path="/productos" element={<ProductosPage session={session} />} />
               <Route path="/usuarios" element={<UsuariosPage session={session} />} />
               <Route path="/soporte" element={<SoportePage session={session} />} />
               <Route path="*" element={<Navigate to="/" />} />
