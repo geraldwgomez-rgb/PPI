@@ -3,19 +3,30 @@ import { supabase } from '../lib/supabaseClient'
 
 export default function AdminSoportePage({ session }) {
   const [usuarios, setUsuarios] = useState([])
-  const [usuarioSeleccionado, setUsuarioSeleccionado] = useState('')
+  const [todosLosMensajes, setTodosLosMensajes] = useState([])
+  const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null)
+  const [cargando, setCargando] = useState(true)
+  const [cargandoConversacion, setCargandoConversacion] = useState(false)
+  const [pestana, setPestana] = useState('conversaciones')
+
+  // Formulario de nuevo mensaje dentro de la conversación abierta
   const [asunto, setAsunto] = useState('')
   const [contenido, setContenido] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState('')
-  const [exito, setExito] = useState('')
-  const [historial, setHistorial] = useState([])
-  const [cargando, setCargando] = useState(true)
-  const [pestana, setPestana] = useState('mensajes')
 
-  // Texto editable de cada respuesta sugerida, por id de mensaje
+  // Respuestas sugeridas editables, por id de mensaje
   const [respuestasEdit, setRespuestasEdit] = useState({})
   const [enviandoRespuesta, setEnviandoRespuesta] = useState(null)
+
+  // Formulario de "Nuevo mensaje": se elige un usuario del desplegable
+  // y se redacta el mensaje, sin necesidad de abrir la conversación.
+  const [destinatarioId, setDestinatarioId] = useState('')
+  const [asuntoNuevo, setAsuntoNuevo] = useState('')
+  const [contenidoNuevo, setContenidoNuevo] = useState('')
+  const [enviandoNuevo, setEnviandoNuevo] = useState(false)
+  const [errorNuevo, setErrorNuevo] = useState('')
+  const [exitoNuevo, setExitoNuevo] = useState('')
 
   // FAQ
   const [faqs, setFaqs] = useState([])
@@ -26,44 +37,31 @@ export default function AdminSoportePage({ session }) {
   const [guardandoFaq, setGuardandoFaq] = useState(false)
 
   useEffect(() => {
-    cargarDatos()
+    cargarUsuariosYMensajes()
     cargarFaqs()
   }, [])
 
-  async function cargarDatos() {
+  async function cargarUsuariosYMensajes() {
     setCargando(true)
-    const { data: us } = await supabase
-      .from('usuarios_info')
-      .select('id, email, rol')
-      .neq('id', session.user.id)
 
-    // Trae TODO: mensajes del admin, del usuario, y la sugerencia
-    // automática (respuesta_sugerida) que dejó el trigger, si aplica.
+    // CORREGIDO: usuarios_info ahora es una función RPC (SECURITY DEFINER),
+    // no una vista sobre auth.users, para evitar el 403 de permisos.
+    // .rpc() no soporta .neq() encadenado, así que el usuario actual
+    // se filtra después, en JS.
+    const { data: usRaw } = await supabase.rpc('usuarios_info')
+    const us = usRaw?.filter(u => u.id !== session.user.id) ?? null
+
+    // Trae TODOS los mensajes de una vez (de todos los usuarios),
+    // para poder armar la lista de conversaciones con su conteo
+    // de no leídos y su último mensaje.
     const { data: msgs } = await supabase
       .from('mensajes')
       .select('id, asunto, contenido, leido, created_at, usuario_id, remitente, respuesta_sugerida')
       .order('created_at', { ascending: false })
 
     if (us) setUsuarios(us)
-    if (msgs && us) {
-      const mensajesConEmail = msgs.map(m => ({
-        ...m,
-        emailUsuario: us.find(u => u.id === m.usuario_id)?.email || m.usuario_id
-      }))
-      setHistorial(mensajesConEmail)
+    if (msgs) setTodosLosMensajes(msgs)
 
-      // Precarga el textarea de sugerencia con lo que propuso el
-      // sistema, sin pisar lo que el admin ya esté editando
-      setRespuestasEdit((prev) => {
-        const nuevo = { ...prev }
-        mensajesConEmail.forEach((m) => {
-          if (m.remitente === 'usuario' && m.respuesta_sugerida && !(m.id in nuevo)) {
-            nuevo[m.id] = m.respuesta_sugerida
-          }
-        })
-        return nuevo
-      })
-    }
     setCargando(false)
   }
 
@@ -75,20 +73,96 @@ export default function AdminSoportePage({ session }) {
     if (data) setFaqs(data)
   }
 
+  // Mensajes del usuario actualmente abierto, del más viejo al más nuevo (como un chat)
+  const conversacionActual = usuarioSeleccionado
+    ? todosLosMensajes
+        .filter(m => m.usuario_id === usuarioSeleccionado.id)
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+    : []
+
+  // Cuántos mensajes sin leer tiene cada usuario (mensajes que el
+  // usuario escribió y el admin todavía no ha abierto)
+  function noLeidosDe(usuarioId) {
+    return todosLosMensajes.filter(
+      m => m.usuario_id === usuarioId && m.remitente === 'usuario' && !m.leido
+    ).length
+  }
+
+  async function abrirConversacion(usuario) {
+    setUsuarioSeleccionado(usuario)
+    setAsunto('')
+    setContenido('')
+    setError('')
+
+    // Precarga las respuestas sugeridas pendientes de esta conversación
+    const pendientes = todosLosMensajes.filter(
+      m => m.usuario_id === usuario.id && m.remitente === 'usuario' && m.respuesta_sugerida
+    )
+    setRespuestasEdit((prev) => {
+      const nuevo = { ...prev }
+      pendientes.forEach((m) => {
+        if (!(m.id in nuevo)) nuevo[m.id] = m.respuesta_sugerida
+      })
+      return nuevo
+    })
+
+    // Marca como leídos (por el admin) los mensajes de ese usuario
+    const idsNoLeidos = todosLosMensajes
+      .filter(m => m.usuario_id === usuario.id && m.remitente === 'usuario' && !m.leido)
+      .map(m => m.id)
+
+    if (idsNoLeidos.length > 0) {
+      setCargandoConversacion(true)
+      await supabase.from('mensajes').update({ leido: true }).in('id', idsNoLeidos)
+      await cargarUsuariosYMensajes()
+      setCargandoConversacion(false)
+    }
+  }
+
+  async function enviarMensajeNuevo(e) {
+    e.preventDefault()
+    setErrorNuevo('')
+    setExitoNuevo('')
+
+    if (!destinatarioId || !asuntoNuevo || !contenidoNuevo) {
+      setErrorNuevo('Selecciona un usuario y completa asunto y mensaje.')
+      return
+    }
+
+    setEnviandoNuevo(true)
+    const { error } = await supabase.from('mensajes').insert({
+      admin_id: session.user.id,
+      usuario_id: destinatarioId,
+      remitente: 'admin',
+      asunto: asuntoNuevo,
+      contenido: contenidoNuevo,
+    })
+    setEnviandoNuevo(false)
+
+    if (error) {
+      setErrorNuevo(error.message)
+    } else {
+      setExitoNuevo('✅ Mensaje enviado correctamente.')
+      setDestinatarioId('')
+      setAsuntoNuevo('')
+      setContenidoNuevo('')
+      cargarUsuariosYMensajes()
+    }
+  }
+
   async function enviarMensaje(e) {
     e.preventDefault()
     setError('')
-    setExito('')
 
-    if (!usuarioSeleccionado || !asunto || !contenido) {
-      setError('Todos los campos son obligatorios.')
+    if (!asunto || !contenido) {
+      setError('Completa asunto y mensaje.')
       return
     }
 
     setEnviando(true)
     const { error } = await supabase.from('mensajes').insert({
       admin_id: session.user.id,
-      usuario_id: usuarioSeleccionado,
+      usuario_id: usuarioSeleccionado.id,
       remitente: 'admin',
       asunto,
       contenido,
@@ -98,16 +172,12 @@ export default function AdminSoportePage({ session }) {
     if (error) {
       setError(error.message)
     } else {
-      setExito('✅ Mensaje enviado correctamente.')
       setAsunto('')
       setContenido('')
-      setUsuarioSeleccionado('')
-      cargarDatos()
+      cargarUsuariosYMensajes()
     }
   }
 
-  // Envía la respuesta sugerida (editada o tal cual) como un
-  // mensaje nuevo del admin hacia el usuario que preguntó.
   async function enviarRespuestaSugerida(mensajeUsuario) {
     const texto = (respuestasEdit[mensajeUsuario.id] || '').trim()
     if (!texto) return
@@ -123,13 +193,12 @@ export default function AdminSoportePage({ session }) {
     setEnviandoRespuesta(null)
 
     if (!error) {
-      // Limpia la sugerencia usada y recarga
       setRespuestasEdit((prev) => {
         const nuevo = { ...prev }
         delete nuevo[mensajeUsuario.id]
         return nuevo
       })
-      cargarDatos()
+      cargarUsuariosYMensajes()
     }
   }
 
@@ -177,12 +246,12 @@ export default function AdminSoportePage({ session }) {
     <div className="container py-4">
       <h2 className="text-danger fw-bold mb-4">💬 Soporte y Sugerencias</h2>
 
-      {/* Pestañas */}
+      {/* Pestañas principales */}
       <ul className="nav nav-tabs mb-4">
         <li className="nav-item">
           <button
-            className={`nav-link ${pestana === 'mensajes' ? 'active text-danger' : 'text-secondary'}`}
-            onClick={() => setPestana('mensajes')}
+            className={`nav-link ${pestana === 'conversaciones' ? 'active text-danger' : 'text-secondary'}`}
+            onClick={() => setPestana('conversaciones')}
           >
             📋 Conversaciones
           </button>
@@ -197,117 +266,196 @@ export default function AdminSoportePage({ session }) {
         </li>
       </ul>
 
-      {pestana === 'mensajes' && (
+      {pestana === 'conversaciones' && (
         <>
-          {/* Formulario para iniciar una conversación */}
+          {/* NUEVO MENSAJE: se elige un usuario del desplegable y se redacta el mensaje */}
           <div className="card bg-dark border-danger border-opacity-50 p-4 mb-4" style={{ borderRadius: '16px' }}>
-            <h5 className="text-white mb-3">✉️ Enviar mensaje a usuario</h5>
-            {error && <div className="alert alert-danger py-2 small">{error}</div>}
-            {exito && <div className="alert alert-success py-2 small">{exito}</div>}
-            <form onSubmit={enviarMensaje}>
-              <div className="mb-3">
-                <label className="form-label text-white fw-light">Usuario destinatario</label>
-                <select
-                  className="form-select bg-black border-secondary text-white"
-                  value={usuarioSeleccionado}
-                  onChange={(e) => setUsuarioSeleccionado(e.target.value)}
-                  required
-                >
-                  <option value="">-- Selecciona un usuario --</option>
-                  {usuarios.map((u) => (
-                    <option key={u.id} value={u.id}>{u.email} ({u.rol})</option>
-                  ))}
-                </select>
+            <h5 className="text-white mb-3">✉️ Nuevo mensaje</h5>
+            {errorNuevo && <div className="alert alert-danger py-2 small">{errorNuevo}</div>}
+            {exitoNuevo && <div className="alert alert-success py-2 small">{exitoNuevo}</div>}
+            <form onSubmit={enviarMensajeNuevo}>
+              <div className="row g-3">
+                <div className="col-12 col-md-4">
+                  <label className="form-label text-white fw-light">Usuario</label>
+                  <select
+                    className="form-select bg-black border-secondary text-white"
+                    value={destinatarioId}
+                    onChange={(e) => setDestinatarioId(e.target.value)}
+                  >
+                    <option value="">-- Selecciona un usuario --</option>
+                    {usuarios.map((u) => (
+                      <option key={u.id} value={u.id}>{u.email} ({u.rol})</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-12 col-md-8">
+                  <label className="form-label text-white fw-light">Asunto</label>
+                  <input
+                    type="text"
+                    className="form-control bg-black border-secondary text-white"
+                    placeholder="Asunto"
+                    value={asuntoNuevo}
+                    onChange={(e) => setAsuntoNuevo(e.target.value)}
+                  />
+                </div>
+                <div className="col-12">
+                  <label className="form-label text-white fw-light">Mensaje</label>
+                  <textarea
+                    className="form-control bg-black border-secondary text-white"
+                    rows={3}
+                    placeholder="Escribe tu mensaje..."
+                    value={contenidoNuevo}
+                    onChange={(e) => setContenidoNuevo(e.target.value)}
+                  />
+                </div>
               </div>
-              <div className="mb-3">
-                <label className="form-label text-white fw-light">Asunto</label>
-                <input
-                  type="text"
-                  className="form-control bg-black border-secondary text-white"
-                  placeholder="Ej. Recordatorio, Sugerencia, Alerta..."
-                  value={asunto}
-                  onChange={(e) => setAsunto(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label text-white fw-light">Mensaje</label>
-                <textarea
-                  className="form-control bg-black border-secondary text-white"
-                  rows={4}
-                  placeholder="Escribe aquí tu mensaje o sugerencia para el usuario..."
-                  value={contenido}
-                  onChange={(e) => setContenido(e.target.value)}
-                  required
-                />
-              </div>
-              <button type="submit" className="btn btn-danger fw-bold w-100" disabled={enviando}>
-                {enviando ? 'Enviando...' : '📤 Enviar mensaje'}
+              <button type="submit" className="btn btn-danger fw-bold mt-3" disabled={enviandoNuevo}>
+                {enviandoNuevo ? 'Enviando...' : '📤 Enviar mensaje'}
               </button>
             </form>
           </div>
 
-          {/* Historial con respuestas sugeridas */}
-          <div className="card bg-dark border-secondary p-4" style={{ borderRadius: '16px' }}>
-            <h5 className="text-white mb-3">📋 Historial completo ({historial.length})</h5>
-            {cargando ? (
-              <p className="text-secondary">Cargando...</p>
-            ) : historial.length === 0 ? (
-              <p className="text-secondary">No hay mensajes aún.</p>
-            ) : (
-              <div className="d-flex flex-column gap-3">
-                {historial.map((m) => {
-                  const esPreguntaConSugerencia = m.remitente === 'usuario' && (m.id in respuestasEdit)
-                  return (
-                    <div key={m.id} className={`card bg-dark p-3 border-opacity-25 ${m.leido ? 'border-secondary' : 'border-warning'}`} style={{ borderRadius: '12px' }}>
-                      <div className="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-2">
-                        <span className="text-white fw-bold">{m.asunto}</span>
-                        <div className="d-flex gap-2 align-items-center">
-                          <span className={`badge ${m.remitente === 'usuario' ? 'bg-primary' : 'bg-danger'}`}>
-                            {m.remitente === 'usuario' ? '👤 Usuario' : '🛡️ Admin'}
-                          </span>
-                          <small className="text-secondary">{new Date(m.created_at).toLocaleDateString('es-CO')}</small>
-                        </div>
-                      </div>
-                      <small className="text-info mb-2 d-block">Conversación con: {m.emailUsuario}</small>
-                      <p className="text-secondary small m-0">{m.contenido}</p>
+          <div className="row g-4">
 
-                      {esPreguntaConSugerencia && (
-                        <div className="mt-3 p-3" style={{ backgroundColor: 'rgba(34, 211, 238, 0.06)', border: '1px dashed var(--border-glow)', borderRadius: '10px' }}>
-                          <small className="text-info d-block mb-2">
-                            🤖 El sistema detectó que esto coincide con una pregunta frecuente. Revisa/edita y envía:
-                          </small>
-                          <textarea
-                            className="form-control bg-black border-secondary text-white mb-2"
-                            rows={3}
-                            value={respuestasEdit[m.id]}
-                            onChange={(e) => setRespuestasEdit((prev) => ({ ...prev, [m.id]: e.target.value }))}
-                          />
-                          <button
-                            className="btn btn-info btn-sm fw-bold"
-                            onClick={() => enviarRespuestaSugerida(m)}
-                            disabled={enviandoRespuesta === m.id}
-                          >
-                            {enviandoRespuesta === m.id ? 'Enviando...' : '✅ Enviar esta respuesta'}
-                          </button>
+          {/* LISTA DE USUARIOS */}
+          <div className="col-12 col-md-4">
+            <div className="card bg-dark border-secondary p-3" style={{ borderRadius: '16px' }}>
+              <h5 className="text-white mb-3">👥 Usuarios ({usuarios.length})</h5>
+              {cargando ? (
+                <p className="text-secondary">Cargando...</p>
+              ) : (
+                <div className="d-flex flex-column gap-2" style={{ maxHeight: '600px', overflowY: 'auto' }}>
+                  {usuarios.map((u) => {
+                    const noLeidos = noLeidosDe(u.id)
+                    return (
+                      <button
+                        key={u.id}
+                        className={`btn text-start p-3 ${usuarioSeleccionado?.id === u.id ? 'btn-info text-dark' : 'btn-outline-secondary text-white'}`}
+                        style={{ borderRadius: '10px' }}
+                        onClick={() => abrirConversacion(u)}
+                      >
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div className="fw-bold small">{u.email}</div>
+                          {noLeidos > 0 && (
+                            <span className="badge bg-warning text-dark">{noLeidos}</span>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  )
-                })}
+                        <span className={`badge mt-1 ${u.rol === 'administrador' ? 'bg-danger' : 'bg-primary'}`}>
+                          {u.rol}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* CONVERSACIÓN */}
+          <div className="col-12 col-md-8">
+            {!usuarioSeleccionado ? (
+              <div className="card bg-dark border-secondary p-4 text-center" style={{ borderRadius: '16px', minHeight: '300px' }}>
+                <p className="text-secondary mt-5">👈 Selecciona un usuario para ver su conversación</p>
+              </div>
+            ) : (
+              <div className="card bg-dark border-danger border-opacity-25 p-4" style={{ borderRadius: '16px' }}>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h5 className="text-white fw-bold m-0">{usuarioSeleccionado.email}</h5>
+                  <button className="btn btn-outline-secondary btn-sm" onClick={() => setUsuarioSeleccionado(null)}>
+                    ✕ Cerrar
+                  </button>
+                </div>
+
+                {cargandoConversacion ? (
+                  <p className="text-secondary">Actualizando...</p>
+                ) : conversacionActual.length === 0 ? (
+                  <p className="text-secondary text-center py-4">Todavía no hay mensajes con este usuario.</p>
+                ) : (
+                  <div className="d-flex flex-column gap-3 mb-4" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                    {conversacionActual.map((m) => (
+                      <div key={m.id}>
+                        <div
+                          className={`card p-3 ${m.remitente === 'usuario' ? 'bg-dark border-primary border-opacity-50' : 'bg-dark border-danger border-opacity-50'}`}
+                          style={{ borderRadius: '12px', marginLeft: m.remitente === 'admin' ? '15%' : '0', marginRight: m.remitente === 'usuario' ? '15%' : '0' }}
+                        >
+                          <div className="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-2">
+                            <span className={`badge ${m.remitente === 'usuario' ? 'bg-primary' : 'bg-danger'}`}>
+                              {m.remitente === 'usuario' ? '👤 Usuario' : '🛡️ Tú (admin)'}
+                            </span>
+                            <small className="text-secondary">{new Date(m.created_at).toLocaleString('es-CO')}</small>
+                          </div>
+                          <p className="text-white fw-bold small m-0 mb-1">{m.asunto}</p>
+                          <p className="text-secondary small m-0">{m.contenido}</p>
+                        </div>
+
+                        {/* Sugerencia automática debajo del mensaje del usuario que la generó */}
+                        {m.remitente === 'usuario' && (m.id in respuestasEdit) && (
+                          <div className="mt-2 p-3" style={{ backgroundColor: 'rgba(34, 211, 238, 0.06)', border: '1px dashed var(--border-glow)', borderRadius: '10px' }}>
+                            <small className="text-info d-block mb-2">
+                              🤖 Respuesta sugerida (coincide con una FAQ) — revisa/edita y envía:
+                            </small>
+                            <textarea
+                              className="form-control bg-black border-secondary text-white mb-2"
+                              rows={2}
+                              value={respuestasEdit[m.id]}
+                              onChange={(e) => setRespuestasEdit((prev) => ({ ...prev, [m.id]: e.target.value }))}
+                            />
+                            <button
+                              className="btn btn-info btn-sm fw-bold"
+                              onClick={() => enviarRespuestaSugerida(m)}
+                              disabled={enviandoRespuesta === m.id}
+                            >
+                              {enviandoRespuesta === m.id ? 'Enviando...' : '✅ Enviar esta respuesta'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Formulario para responder / iniciar */}
+                <hr style={{ borderColor: 'var(--border)' }} />
+                <h6 className="text-white mb-2">✉️ Escribir a {usuarioSeleccionado.email}</h6>
+                {error && <div className="alert alert-danger py-2 small">{error}</div>}
+                <form onSubmit={enviarMensaje}>
+                  <div className="mb-2">
+                    <input
+                      type="text"
+                      className="form-control bg-black border-secondary text-white"
+                      placeholder="Asunto"
+                      value={asunto}
+                      onChange={(e) => setAsunto(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="mb-2">
+                    <textarea
+                      className="form-control bg-black border-secondary text-white"
+                      rows={3}
+                      placeholder="Escribe tu mensaje..."
+                      value={contenido}
+                      onChange={(e) => setContenido(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <button type="submit" className="btn btn-danger fw-bold w-100" disabled={enviando}>
+                    {enviando ? 'Enviando...' : '📤 Enviar'}
+                  </button>
+                </form>
               </div>
             )}
+          </div>
           </div>
         </>
       )}
 
       {pestana === 'faq' && (
         <>
-          {/* Nueva FAQ */}
           <div className="card bg-dark border-danger border-opacity-50 p-4 mb-4" style={{ borderRadius: '16px' }}>
             <h5 className="text-white mb-2">🤖 Nueva pregunta frecuente</h5>
             <p className="text-secondary small mb-3">
-              Cuando un usuario escribe un mensaje que contiene alguna de las "palabras clave", el sistema te deja la respuesta lista para revisar y enviar — tú decides si la usas tal cual, la editas, o respondes algo distinto.
+              Cuando un usuario escribe un mensaje que contiene alguna de las "palabras clave", el sistema te deja la respuesta lista para revisar y enviar dentro de la conversación.
             </p>
             {faqError && <div className="alert alert-danger py-2 small">{faqError}</div>}
             <form onSubmit={guardarFaq}>
@@ -351,7 +499,6 @@ export default function AdminSoportePage({ session }) {
             </form>
           </div>
 
-          {/* Lista de FAQ */}
           <div className="card bg-dark border-secondary p-4" style={{ borderRadius: '16px' }}>
             <h5 className="text-white mb-3">📚 Preguntas frecuentes configuradas ({faqs.length})</h5>
             {faqs.length === 0 ? (

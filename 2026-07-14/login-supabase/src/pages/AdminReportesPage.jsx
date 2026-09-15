@@ -31,9 +31,9 @@ export default function AdminReportesPage() {
 
   useEffect(() => {
     async function cargarUsuarios() {
-      const { data } = await supabase
-        .rpc('obtener_usuarios')
-        .select('id, email, rol, created_at')
+      // CORREGIDO: usuarios_info ahora es una función RPC (SECURITY DEFINER),
+      // no una vista sobre auth.users, para evitar el 403 de permisos.
+      const { data } = await supabase.rpc('usuarios_info')
       if (data) setUsuarios(data)
       setCargando(false)
     }
