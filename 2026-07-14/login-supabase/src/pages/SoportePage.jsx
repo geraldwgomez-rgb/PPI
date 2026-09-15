@@ -11,7 +11,6 @@ export default function SoportePage({ session }) {
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState('')
   const [exito, setExito] = useState('')
-  const [adminId, setAdminId] = useState(null)
 
   useEffect(() => {
     cargarDatos()
@@ -20,25 +19,20 @@ export default function SoportePage({ session }) {
   async function cargarDatos() {
     setCargando(true)
 
-    // Obtener mensajes recibidos
+    // Conversación completa: lo que el usuario escribió (remitente
+    // = 'usuario') y lo que el admin le respondió (remitente = 'admin').
+    // El campo respuesta_sugerida NUNCA se selecciona aquí — es solo
+    // para uso interno del administrador.
     const { data: msgs } = await supabase
       .from('mensajes')
-      .select('id, asunto, contenido, leido, created_at')
+      .select('id, asunto, contenido, leido, created_at, remitente')
       .eq('usuario_id', session.user.id)
       .order('created_at', { ascending: false })
 
-    // Obtener un admin para enviarle mensajes
-    const { data: admins } = await supabase
-      .from('roles')
-      .select('id')
-      .eq('rol', 'administrador')
-      .limit(1)
-
     if (msgs) {
       setMensajes(msgs)
-      setNoLeidos(msgs.filter(m => !m.leido).length)
+      setNoLeidos(msgs.filter(m => !m.leido && m.remitente === 'admin').length)
     }
-    if (admins && admins.length > 0) setAdminId(admins[0].id)
 
     setCargando(false)
   }
@@ -49,7 +43,11 @@ export default function SoportePage({ session }) {
   }
 
   async function marcarTodosLeidos() {
-    await supabase.from('mensajes').update({ leido: true }).eq('usuario_id', session.user.id).eq('leido', false)
+    await supabase
+      .from('mensajes')
+      .update({ leido: true })
+      .eq('usuario_id', session.user.id)
+      .eq('leido', false)
     cargarDatos()
   }
 
@@ -62,26 +60,28 @@ export default function SoportePage({ session }) {
       setError('Todos los campos son obligatorios.')
       return
     }
-    if (!adminId) {
-      setError('No hay administradores disponibles en este momento.')
-      return
-    }
 
     setEnviando(true)
     const { error } = await supabase.from('mensajes').insert({
-      admin_id: session.user.id,
-      usuario_id: adminId,
+      usuario_id: session.user.id,
+      admin_id: null,
+      remitente: 'usuario',
       asunto,
       contenido,
+      leido: true, // el propio usuario ya lo "leyó", es quien lo escribió
     })
     setEnviando(false)
 
     if (error) {
       setError(error.message)
     } else {
-      setExito('✅ Mensaje enviado al equipo de soporte.')
+      setExito('✅ Mensaje enviado. Un administrador te responderá pronto.')
       setAsunto('')
       setContenido('')
+      setTimeout(() => {
+        setPestana('mensajes')
+        cargarDatos()
+      }, 800)
     }
   }
 
@@ -103,7 +103,7 @@ export default function SoportePage({ session }) {
             className={`nav-link ${pestana === 'mensajes' ? 'active text-info' : 'text-secondary'}`}
             onClick={() => setPestana('mensajes')}
           >
-            📥 Mensajes recibidos
+            📥 Conversación
             {noLeidos > 0 && <span className="badge bg-warning text-dark ms-2">{noLeidos}</span>}
           </button>
         </li>
@@ -117,7 +117,7 @@ export default function SoportePage({ session }) {
         </li>
       </ul>
 
-      {/* Mensajes recibidos */}
+      {/* Conversación */}
       {pestana === 'mensajes' && (
         <>
           {noLeidos > 0 && (
@@ -133,7 +133,7 @@ export default function SoportePage({ session }) {
           ) : mensajes.length === 0 ? (
             <div className="card bg-dark border-secondary p-5 text-center" style={{ borderRadius: '16px' }}>
               <p className="text-secondary mb-0">📭 No tienes mensajes aún.</p>
-              <small className="text-muted">Aquí aparecerán los mensajes del equipo SMC.</small>
+              <small className="text-muted">Escribe tu primera pregunta en "Enviar mensaje".</small>
             </div>
           ) : (
             <div className="d-flex flex-column gap-3">
@@ -141,16 +141,16 @@ export default function SoportePage({ session }) {
                 <div
                   key={m.id}
                   className={`card bg-dark p-4 border-opacity-50 ${m.leido ? 'border-secondary' : 'border-info'}`}
-                  style={{ borderRadius: '16px', cursor: !m.leido ? 'pointer' : 'default' }}
-                  onClick={() => !m.leido && marcarLeido(m.id)}
+                  style={{ borderRadius: '16px', cursor: !m.leido && m.remitente === 'admin' ? 'pointer' : 'default' }}
+                  onClick={() => !m.leido && m.remitente === 'admin' && marcarLeido(m.id)}
                 >
                   <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                     <h5 className={`fw-bold m-0 ${m.leido ? 'text-secondary' : 'text-white'}`}>
-                      {!m.leido && '🔔 '}{m.asunto}
+                      {!m.leido && m.remitente === 'admin' && '🔔 '}{m.asunto}
                     </h5>
                     <div className="d-flex gap-2 align-items-center">
-                      <span className={`badge ${m.leido ? 'bg-secondary' : 'bg-info text-dark'}`}>
-                        {m.leido ? 'Leído' : 'Nuevo'}
+                      <span className={`badge ${m.remitente === 'usuario' ? 'bg-secondary' : (m.leido ? 'bg-secondary' : 'bg-info text-dark')}`}>
+                        {m.remitente === 'usuario' ? 'Tú' : (m.leido ? 'Leído' : 'Nuevo')}
                       </span>
                       <small className="text-secondary">
                         {new Date(m.created_at).toLocaleDateString('es-CO')}
@@ -158,7 +158,7 @@ export default function SoportePage({ session }) {
                     </div>
                   </div>
                   <p className={`m-0 ${m.leido ? 'text-muted' : 'text-secondary'}`}>{m.contenido}</p>
-                  {!m.leido && (
+                  {!m.leido && m.remitente === 'admin' && (
                     <small className="text-info mt-2">👆 Haz clic para marcar como leído</small>
                   )}
                 </div>
