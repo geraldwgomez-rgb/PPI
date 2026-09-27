@@ -19,7 +19,14 @@ function IndexPage({ onEntrar }) {
         {/* ==================== NAVBAR ==================== */}
         <nav
           className="navbar navbar-expand-lg navbar-dark px-4"
-          style={{ backgroundColor: 'rgba(16, 20, 28, 0.85)', backdropFilter: 'blur(8px)', borderBottom: '1px solid var(--border)' }}
+          style={{
+            backgroundColor: 'rgba(16, 20, 28, 0.85)',
+            backdropFilter: 'blur(8px)',
+            borderBottom: '1px solid var(--border)',
+            position: 'sticky',
+            top: 0,
+            zIndex: 100,
+          }}
         >
           <div className="container-fluid">
             <h1 className="navbar-brand fw-bold text-info fs-4 m-0 d-flex align-items-center gap-2">
@@ -100,7 +107,7 @@ function IndexPage({ onEntrar }) {
             <div className="col-6 col-md-3">
               <div className="kpi-card h-100">
                 <div className="kpi-card__label">Equipo</div>
-                <div className="kpi-card__value kpi-card__value--success">6 devs</div>
+                <div className="kpi-card__value kpi-card__value--success">5 devs</div>
               </div>
             </div>
             <div className="col-6 col-md-3">
@@ -163,9 +170,9 @@ function IndexPage({ onEntrar }) {
               {/* Yulian */}
               <div className="col-6 col-md-3">
                 <div className="glow-card h-100 text-center">
-                  <div className="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center"
-                    style={{ width: 120, height: 120, overflow: 'hidden', border: '2px solid var(--accent)' }}>
-                    <img src={fotoYulian} alt="Foto Yulian Monsalve" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div className="mx-auto mb-3 rounded-circle overflow-hidden"
+                    style={{ width: 120, height: 120, border: '2px solid var(--accent)' }}>
+                    <img src={fotoYulian} alt="Yulian Monsalve" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                   <h5 className="text-info fw-bold mb-1">Yulian Monsalve</h5>
                   <span className="badge mb-3" style={{ backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}>Frontend & Backend</span>
@@ -179,9 +186,9 @@ function IndexPage({ onEntrar }) {
               {/* Sarai */}
               <div className="col-6 col-md-3">
                 <div className="glow-card h-100 text-center">
-                  <div className="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center"
-                    style={{ width: 120, height: 120, overflow: 'hidden', border: '2px solid #d63384' }}>
-                    <img src={fotoSarai} alt="Foto Sarai Cardona" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div className="mx-auto mb-3 rounded-circle overflow-hidden"
+                    style={{ width: 120, height: 120, border: '2px solid #d63384' }}>
+                    <img src={fotoSarai} alt="Sarai Cardona" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                   <h5 className="text-info fw-bold mb-1">Sarai Cardona</h5>
                   <span className="badge mb-3" style={{ backgroundColor: 'rgba(214, 51, 132, 0.15)', color: '#d63384' }}>Frontend</span>
@@ -195,9 +202,9 @@ function IndexPage({ onEntrar }) {
               {/* Daniel */}
               <div className="col-6 col-md-3">
                 <div className="glow-card h-100 text-center">
-                  <div className="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center"
-                    style={{ width: 120, height: 120, overflow: 'hidden', border: '2px dashed var(--border-light)' }}>
-                    <img src={fotoDaniel} alt="Foto Daniel Gomez" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div className="mx-auto mb-3 rounded-circle overflow-hidden"
+                    style={{ width: 120, height: 120, border: '2px solid var(--border-light)' }}>
+                    <img src={fotoDaniel} alt="Daniel Gomez" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                   <h5 className="text-info fw-bold mb-1">Daniel Gomez</h5>
                   <span className="badge mb-3" style={{ backgroundColor: 'var(--success-soft)', color: 'var(--success)' }}>Frontend</span>
@@ -211,9 +218,9 @@ function IndexPage({ onEntrar }) {
               {/* Gerald */}
               <div className="col-6 col-md-3">
                 <div className="glow-card h-100 text-center">
-                  <div className="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center"
-                    style={{ width: 120, height: 120, overflow: 'hidden', border: '2px dashed var(--border-light)' }}>
-                    <img src={fotoGerald} alt="Foto Gerald Williams" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div className="mx-auto mb-3 rounded-circle overflow-hidden"
+                    style={{ width: 120, height: 120, border: '2px solid var(--border-light)' }}>
+                    <img src={fotoGerald} alt="Gerald Williams" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                   <h5 className="text-info fw-bold mb-1">Gerald Williams</h5>
                   <span className="badge mb-3" style={{ backgroundColor: 'rgba(104, 14, 207, 0.15)', color: '#a25bf0' }}>Frontend & Backend</span>
@@ -230,9 +237,9 @@ function IndexPage({ onEntrar }) {
               {/* Juan Jose */}
               <div className="col-6 col-md-3">
                 <div className="glow-card h-100 text-center">
-                  <div className="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center"
-                    style={{ width: 120, height: 120, overflow: 'hidden', border: '2px dashed var(--border-light)' }}>
-                    <img src={fotoJuanJose} alt="Foto Juan Jose Gaviria" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div className="mx-auto mb-3 rounded-circle overflow-hidden"
+                    style={{ width: 120, height: 120, border: '2px solid var(--border-light)' }}>
+                    <img src={fotoJuanJose} alt="Juan Jose Gaviria" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                   <h5 className="text-info fw-bold mb-1">Juan Jose Gaviria</h5>
                   <span className="badge mb-3" style={{ backgroundColor: 'rgba(104, 14, 207, 0.15)', color: '#a25bf0' }}>Frontend & Backend</span>
