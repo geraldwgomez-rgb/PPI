@@ -1,3 +1,6 @@
+import { useTranslation, Trans } from 'react-i18next'
+import SelectorIdioma from '../components/SelectorIdioma'
+import Manuales from '../components/Manuales'
 import fotoYulian from '../assets/fundadores/yulian.jpg'
 import fotoSarai from '../assets/fundadores/sarai.jpg'
 import fotoDaniel from '../assets/fundadores/daniel.jpg'
@@ -5,6 +8,8 @@ import fotoGerald from '../assets/fundadores/gerald.jpg'
 import fotoJuanJose from '../assets/fundadores/juanjose.jpg'
 
 function IndexPage({ onEntrar }) {
+  const { t } = useTranslation()
+
   return (
     <>
       {/* FONDO ANIMADO (crossfade + Ken Burns) */}
@@ -36,7 +41,7 @@ function IndexPage({ onEntrar }) {
             {/* Pills de estado, estilo "LIVE ONLINE / SYS V4.2" */}
             <div className="d-none d-lg-flex align-items-center gap-2 ms-3">
               <span className="badge" style={{ backgroundColor: 'var(--success-soft)', color: 'var(--success)' }}>
-                ● SISTEMA ACTIVO
+                {t('badge.activo')}
               </span>
               <span className="badge font-mono" style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
                 V1.0
@@ -54,19 +59,22 @@ function IndexPage({ onEntrar }) {
 
             <div className="collapse navbar-collapse" id="navbarNav">
               {/* Tabs de navegación a cada sección */}
-              <div className="navbar-nav mx-auto d-flex flex-row gap-4">
-                <a href="#introduccion" className="nav-link text-secondary small text-uppercase" style={{ letterSpacing: '0.06em' }}>Introducción</a>
-                <a href="#problema" className="nav-link text-secondary small text-uppercase" style={{ letterSpacing: '0.06em' }}>El Problema</a>
-                <a href="#objetivos" className="nav-link text-secondary small text-uppercase" style={{ letterSpacing: '0.06em' }}>Objetivos</a>
-                <a href="#fundadores" className="nav-link text-secondary small text-uppercase" style={{ letterSpacing: '0.06em' }}>Fundadores</a>
+              <div className="navbar-nav mx-auto d-flex flex-row align-items-center gap-4">
+                <a href="#introduccion" className="nav-link text-secondary small text-uppercase" style={{ letterSpacing: '0.06em' }}>{t('nav.introduccion')}</a>
+                <a href="#problema" className="nav-link text-secondary small text-uppercase" style={{ letterSpacing: '0.06em' }}>{t('nav.problema')}</a>
+                <a href="#objetivos" className="nav-link text-secondary small text-uppercase" style={{ letterSpacing: '0.06em' }}>{t('nav.objetivos')}</a>
+                <a href="#fundadores" className="nav-link text-secondary small text-uppercase" style={{ letterSpacing: '0.06em' }}>{t('nav.fundadores')}</a>
+                <a href="#manuales" className="nav-link text-secondary small text-uppercase" style={{ letterSpacing: '0.06em' }}>{t('nav.manuales')}</a>
+                {/* Selector de idioma, al lado de Fundadores */}
+                <SelectorIdioma />
               </div>
 
               <div className="navbar-nav ms-auto">
                 <button
-                  className="btn btn-outline-info me-2"
+                  className="btn btn-outline-info me-2 ms-3 text-nowrap"
                   onClick={onEntrar}
                 >
-                  Iniciar sesión
+                  {t('nav.login')}
                 </button>
               </div>
             </div>
@@ -77,16 +85,16 @@ function IndexPage({ onEntrar }) {
 
           {/* ==================== HERO / INTRODUCCIÓN ==================== */}
           <section id="introduccion" className="hero-header">
-            <p className="eyebrow mb-2">SISTEMA SMC // GESTIÓN CONTABLE INTELIGENTE</p>
-            <h1>INTRODUCCIÓN</h1>
+            <p className="eyebrow mb-2">{t('hero.eyebrow')}</p>
+            <h1>{t('hero.titulo')}</h1>
             <p className="lead fw-normal mb-3" style={{ maxWidth: '760px', color: 'rgba(232,237,242,0.85)' }}>
-              La aplicación busca resolver problemas en cuanto a la <strong style={{ color: 'var(--text-primary)' }}>administración contable</strong> de las empresas,
-              mediante un sistema el cual realizará el seguimiento a los ingresos y gastos teniendo en cuenta los gastos
-              fijos, variables, impuestos e inversiones.
+              <Trans
+                i18nKey="hero.p1"
+                components={{ b: <strong style={{ color: 'var(--text-primary)' }} /> }}
+              />
             </p>
             <p style={{ maxWidth: '760px' }}>
-              Nuestro objetivo es brindar una oportunidad para que los comercios en Colombia tengan un mejor futuro,
-              logrando expandirse y crecer monetariamente a través de operaciones estadísticas precisas.
+              {t('hero.p2')}
             </p>
           </section>
 
@@ -94,25 +102,25 @@ function IndexPage({ onEntrar }) {
           <div className="row g-3 mb-5">
             <div className="col-6 col-md-3">
               <div className="kpi-card h-100">
-                <div className="kpi-card__label">Módulos activos</div>
+                <div className="kpi-card__label">{t('kpi.modulos')}</div>
                 <div className="kpi-card__value kpi-card__value--accent">12+</div>
               </div>
             </div>
             <div className="col-6 col-md-3">
               <div className="kpi-card h-100">
-                <div className="kpi-card__label">Stack tecnológico</div>
+                <div className="kpi-card__label">{t('kpi.stack')}</div>
                 <div className="kpi-card__value" style={{ fontSize: '18px' }}>React + Supabase</div>
               </div>
             </div>
             <div className="col-6 col-md-3">
               <div className="kpi-card h-100">
-                <div className="kpi-card__label">Equipo</div>
+                <div className="kpi-card__label">{t('kpi.equipo')}</div>
                 <div className="kpi-card__value kpi-card__value--success">5 devs</div>
               </div>
             </div>
             <div className="col-6 col-md-3">
               <div className="kpi-card h-100">
-                <div className="kpi-card__label">Base</div>
+                <div className="kpi-card__label">{t('kpi.base')}</div>
                 <div className="kpi-card__value" style={{ fontSize: '18px' }}>Medellín, CO</div>
               </div>
             </div>
@@ -123,16 +131,14 @@ function IndexPage({ onEntrar }) {
           {/* ==================== EL PROBLEMA ==================== */}
           <section id="problema" className="row justify-content-center mb-5">
             <div className="col-md-10 text-center">
-              <p className="eyebrow mb-2">DIAGNÓSTICO</p>
-              <h2 className="section-title mb-4" style={{ color: 'var(--danger)' }}>EL PROBLEMA</h2>
+              <p className="eyebrow mb-2">{t('problema.eyebrow')}</p>
+              <h2 className="section-title mb-4" style={{ color: 'var(--danger)' }}>{t('problema.titulo')}</h2>
               <div className="glow-card text-start" style={{ borderColor: 'rgba(255, 92, 122, 0.3)', boxShadow: '0 0 16px rgba(255, 92, 122, 0.15), var(--shadow-card)' }}>
                 <p className="fs-5 fw-light fst-italic mb-3">
-                  "Muchos microempresarios en Colombia no conocen la importancia de un orden financiero,
-                  lo que provoca pérdidas de dinero y cierres prematuros."
+                  "{t('problema.cita')}"
                 </p>
                 <p className="m-0">
-                  Nuestra aplicación soluciona esta brecha informativa, proporcionando un sistema de seguimiento
-                  robusto que informa y previene la insolvencia.
+                  {t('problema.texto')}
                 </p>
               </div>
             </div>
@@ -141,20 +147,18 @@ function IndexPage({ onEntrar }) {
           {/* ==================== OBJETIVOS ==================== */}
           <section id="objetivos">
             <div className="mt-5 p-3 rounded-pill text-center mb-3" style={{ backgroundColor: 'var(--accent-soft)', border: '1px solid var(--border-glow)' }}>
-              <h2 className="section-title m-0">OBJETIVOS</h2>
+              <h2 className="section-title m-0">{t('objetivos.titulo')}</h2>
             </div>
 
             <div className="card mb-5">
-              <h3 className="text-info mb-3">Objetivo General</h3>
-              <p className="mb-4">Diseñar y crear una aplicación web que permita registrar, controlar y analizar los ingresos y gastos de los usuarios.</p>
+              <h3 className="text-info mb-3">{t('objetivos.generalTitulo')}</h3>
+              <p className="mb-4">{t('objetivos.generalTexto')}</p>
 
-              <h3 className="text-info mb-3">Objetivos Específicos</h3>
+              <h3 className="text-info mb-3">{t('objetivos.especificosTitulo')}</h3>
               <ul className="text-secondary m-0">
-                <li>Identificar los diferentes tipos de aplicaciones contables e identificar el funcionamiento y las variables</li>
-                <li>Crear y diseñar el modelo de datos para la aplicación contable</li>
-                <li>Diseñar y crear el sistema contable</li>
-                <li>Realizar pruebas al sistema contable</li>
-                <li>Documentar el desarrollo del sistema y elaborar manuales de usuario</li>
+                {t('objetivos.lista', { returnObjects: true }).map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
               </ul>
             </div>
           </section>
@@ -162,7 +166,7 @@ function IndexPage({ onEntrar }) {
           {/* ==================== FUNDADORES ==================== */}
           <section id="fundadores">
             <div className="mt-5 p-3 rounded-pill text-center mb-4" style={{ backgroundColor: 'var(--accent)' }}>
-              <h2 className="fw-bolder m-0" style={{ color: '#06131A' }}>FUNDADORES</h2>
+              <h2 className="fw-bolder m-0" style={{ color: '#06131A' }}>{t('fundadores.titulo')}</h2>
             </div>
 
             <div className="row g-4 mb-4">
@@ -177,8 +181,7 @@ function IndexPage({ onEntrar }) {
                   <h5 className="text-info fw-bold mb-1">Yulian Monsalve</h5>
                   <span className="badge mb-3" style={{ backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}>Frontend & Backend</span>
                   <p className="fs-6 text-start lh-sm" style={{ color: 'var(--text-secondary)' }}>
-                    Residente en Carpinelo, Medellín. Especialista en HTML y CSS con visión en lógica de Backend.
-                    Su enfoque es la funcionalidad robusta y la profesionalización tecnológica.
+                    {t('fundadores.yulian')}
                   </p>
                 </div>
               </div>
@@ -193,8 +196,7 @@ function IndexPage({ onEntrar }) {
                   <h5 className="text-info fw-bold mb-1">Sarai Cardona</h5>
                   <span className="badge mb-3" style={{ backgroundColor: 'rgba(214, 51, 132, 0.15)', color: '#d63384' }}>Frontend</span>
                   <p className="fs-6 text-start lh-sm" style={{ color: 'var(--text-secondary)' }}>
-                    Residente de Santo Domingo, Medellín. Especialista en diseño visual. Se enfoca en crear
-                    experiencias impactantes, creativas y fáciles de usar para el usuario final.
+                    {t('fundadores.sarai')}
                   </p>
                 </div>
               </div>
@@ -209,8 +211,7 @@ function IndexPage({ onEntrar }) {
                   <h5 className="text-info fw-bold mb-1">Daniel Gomez</h5>
                   <span className="badge mb-3" style={{ backgroundColor: 'var(--success-soft)', color: 'var(--success)' }}>Frontend</span>
                   <p className="fs-6 text-start lh-sm" style={{ color: 'var(--text-secondary)' }}>
-                    Daniel Gómez Ortiz, residente en Santo Domingo, Medellín. Se especializa en diseño visual
-                    y calidad. Busca que su trabajo sea detallado y del agrado de los clientes.
+                    {t('fundadores.daniel')}
                   </p>
                 </div>
               </div>
@@ -225,8 +226,7 @@ function IndexPage({ onEntrar }) {
                   <h5 className="text-info fw-bold mb-1">Gerald Williams</h5>
                   <span className="badge mb-3" style={{ backgroundColor: 'rgba(104, 14, 207, 0.15)', color: '#a25bf0' }}>Frontend & Backend</span>
                   <p className="fs-6 text-start lh-sm" style={{ color: 'var(--text-secondary)' }}>
-                    Desarrollador Backend Jr. en Medellín. Especialista en administración de bases de datos y Node.js.
-                    Enfocado en crear sistemas escalables y eficientes.
+                    {t('fundadores.gerald')}
                   </p>
                 </div>
               </div>
@@ -244,13 +244,15 @@ function IndexPage({ onEntrar }) {
                   <h5 className="text-info fw-bold mb-1">Juan Jose Gaviria</h5>
                   <span className="badge mb-3" style={{ backgroundColor: 'rgba(104, 14, 207, 0.15)', color: '#a25bf0' }}>Frontend & Backend</span>
                   <p className="fs-6 text-start lh-sm" style={{ color: 'var(--text-secondary)' }}>
-                    Residente del Carpinelo, Medellín, Colombia. Desarrollador Backend Jr. especialista en
-                    Node.js y bases de datos. Enfocado en construir sistemas robustos y eficientes.
+                    {t('fundadores.juanjose')}
                   </p>
                 </div>
               </div>
             </div>
           </section>
+
+          {/* ==================== MANUALES ==================== */}
+          <Manuales />
 
           {/* ==================== BOTÓN ENTRAR ==================== */}
           <div className="text-center mt-4 mb-5">
@@ -266,7 +268,7 @@ function IndexPage({ onEntrar }) {
               }}
               onClick={onEntrar}
             >
-              Entrar al Sistema →
+              {t('entrar')}
             </button>
           </div>
 
