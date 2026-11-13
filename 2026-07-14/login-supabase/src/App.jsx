@@ -17,6 +17,7 @@ import AdminReportesPage from './pages/AdminReportesPage'
 import AdminSoportePage from './pages/AdminSoportePage'
 import SoportePage from './pages/SoportePage'
 import './index.css'
+import './i18nApp'
 
 function App() {
   const [session, setSession] = useState(null)
